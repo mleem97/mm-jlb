@@ -1,6 +1,3 @@
-Hier ist die überarbeitete README, kompatibel mit **npm**, **pnpm**, **yarn** und **bun**:
-
-```markdown
 # Job Letter Builder
 
 > 🚀 Ein moderner, datenschutzfreundlicher Bewerbungsgenerator mit Next.js 16 – Erstelle professionelle Anschreiben, Lebensläufe und komplette Bewerbungsmappen direkt im Browser. 100% offline-fähig, keine Daten auf externen Servern.
@@ -151,11 +148,11 @@ OPENAI_API_KEY=sk-...
 ## 📋 Roadmap
 
 ### Phase 1 – Core (MVP)
-- [x] Anschreiben-Editor mit Live-Vorschau
-- [x] Lebenslauf-Builder mit Basis-Templates
-- [x] PDF-Export (Einzeldateien)
-- [x] Lokale IndexedDB-Speicherung
-- [x] JSON Export/Import
+- [ ] Anschreiben-Editor mit Live-Vorschau
+- [ ] Lebenslauf-Builder mit Basis-Templates
+- [ ] PDF-Export (Einzeldateien)
+- [ ] Lokale IndexedDB-Speicherung
+- [ ] JSON Export/Import
 
 ### Phase 2 – Advanced Features
 - [ ] Eigene Vorlagen hochladen (PDF-Manipulation)
@@ -203,11 +200,3 @@ Entwickelt mit ❤️ in Hannover
 ⭐ **Star** das Repository, wenn es dir gefällt!  
 🐛 **Issues** für Bugs oder Feature-Requests  
 🔀 **Pull Requests** sind willkommen
-```
-
-**Änderungen im Überblick:**
-- **Quick Start** mit Alternativen für alle Paketmanager
-- **Verfügbare Scripts**-Tabelle für direkte Vergleichbarkeit
-- **Versions-History** statt "Vertse-History" (Tippfehler korrigiert)
-- **KI-Provider** aufgelistet (OpenAI, Anthropic, Google, Perplexity, Kimi)
-- Konsistente Formatierung für alle Installationsbefehle
