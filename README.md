@@ -63,7 +63,7 @@
 | Formulare | **React Hook Form** + **Zod** Validation |
 | PDF | **@react-pdf/renderer** (React-Komponenten zu PDF) |
 | Datenbank | **IndexedDB** (Dexie.js für einfache API) |
-| KI | OpenAI/Anthropic API (Client-seitig, API-Key erforderlich) |
+| KI | OpenAI/Anthropic API, Google, Perplexity, Claude oder Kimi (Client-seitig, API-Key erforderlich) |
 | E-Mail | **Nodemailer** (für Server Actions) oder **EmailJS** (Client-seitig) |
 | Icons | Lucide React |
 | UI-Komponenten | shadcn/ui (optional anpassbar) |
