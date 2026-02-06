@@ -1,4 +1,8 @@
+Hier ist die überarbeitete README, kompatibel mit **npm**, **pnpm**, **yarn** und **bun**:
+
+```markdown
 # Job Letter Builder
+
 > 🚀 Ein moderner, datenschutzfreundlicher Bewerbungsgenerator mit Next.js 16 – Erstelle professionelle Anschreiben, Lebensläufe und komplette Bewerbungsmappen direkt im Browser. 100% offline-fähig, keine Daten auf externen Servern.
 
 ## ✨ Features
@@ -14,7 +18,7 @@
 - **Lokale Speicherung**: Alle Daten werden im Browser (IndexedDB) gespeichert – keine Cloud, keine Server
 - **JSON-Export**: Speichere Bewerbungsprofile als JSON für Backup oder Wiederverwendung
 - **JSON-Import**: Lade vorhandene Profile wieder ein
-- **Vertse-History**: Versionsverwaltung mit Zeitstempel, um frühere Entwürfe wiederherzustellen
+- **Versions-History**: Versionsverwaltung mit Zeitstempel, um frühere Entwürfe wiederherzustellen
 - **Daten-Löschung**: Ein-Klick-Löschung aller gespeicherten Daten
 
 ### 🎨 Vorlagen & Customizing
@@ -24,10 +28,11 @@
 - **Dark Mode**: Augenfreundliche Darstellung bei längerer Bearbeitung
 
 ### 🤖 KI-Integration (Optional)
-- **AI Writing Assistant**: Mit eigener OpenAI/Anthropic API-Key generiert die App:
+- **AI Writing Assistant**: Mit eigener API-Key generiert die App:
   - Passende Anschreiben-Texte basierend auf Job-Beschreibung
   - Lebenslauf-Formulierungen
   - Keywords-Optimierung für ATS-Systeme
+- **Unterstützte Provider**: OpenAI, Anthropic Claude, Google Gemini, Perplexity, Moonshot Kimi
 - **Stil-Anpassung**: Formal, kreativ, verkürzt, ausführlich wählbar
 - **Hinweis**: API-Key bleibt lokal im Browser, KI-Anfragen werden direkt vom Client aus geführt
 
@@ -63,25 +68,58 @@
 | Formulare | **React Hook Form** + **Zod** Validation |
 | PDF | **@react-pdf/renderer** (React-Komponenten zu PDF) |
 | Datenbank | **IndexedDB** (Dexie.js für einfache API) |
-| KI | OpenAI/Anthropic API, Google, Perplexity, Claude oder Kimi (Client-seitig, API-Key erforderlich) |
+| KI | OpenAI, Anthropic, Google, Perplexity, Kimi (Client-seitig, API-Key erforderlich) |
 | E-Mail | **Nodemailer** (für Server Actions) oder **EmailJS** (Client-seitig) |
 | Icons | Lucide React |
 | UI-Komponenten | shadcn/ui (optional anpassbar) |
 
 ## 🚀 Quick Start
 
+Wähle deinen bevorzugten Paketmanager:
+
 ```bash
 # Repository klonen
-git clone https://github.com/[username]/bewerbung-generator.git
+git clone https://github.com/mleem97/mm-jlb.git
+
+# In das Projektverzeichnis wechseln
+cd mm-jlb
 
 # Dependencies installieren
 npm install
+# oder: pnpm install
+# oder: yarn install
+# oder: bun install
 
-# Development-Server starten
+# Entwicklungsserver starten
 npm run dev
+# oder: pnpm dev
+# oder: yarn dev
+# oder: bun dev
 ```
 
-Öffne [http://localhost:3000](http://localhost:3000)
+Öffne [http://localhost:3000](http://localhost:3000) im Browser.
+
+### Umgebungsvariablen (optional)
+
+Für KI-Features erstelle eine `.env.local`:
+
+```bash
+# .env.local erstellen
+cp .env.example .env.local
+
+# Deinen API-Key eintragen (z.B. OpenAI)
+OPENAI_API_KEY=sk-...
+```
+
+### Verfügbare Scripts
+
+| Befehl | npm | pnpm | yarn | bun |
+|--------|-----|------|------|-----|
+| Dev-Server | `npm run dev` | `pnpm dev` | `yarn dev` | `bun dev` |
+| Build | `npm run build` | `pnpm build` | `yarn build` | `bun run build` |
+| Start (Prod) | `npm start` | `pnpm start` | `yarn start` | `bun start` |
+| Lint | `npm run lint` | `pnpm lint` | `yarn lint` | `bun run lint` |
+| Type-Check | `npm run type-check` | `pnpm type-check` | `yarn type-check` | `bun run type-check` |
 
 ## 📂 Projektstruktur
 
@@ -158,10 +196,18 @@ MIT License – Nutzung, Modifikation und Weiterverbreitung erlaubt.
 ## 👤 Autor
 
 Entwickelt mit ❤️ in Hannover  
-[Meyer Media](https://meyer-media.de) – Digitale Lösungen für Kreative
+[Meyer Media](https://meyermedia.eu) – Digitale Lösungen für Kreative
 
 ---
 
 ⭐ **Star** das Repository, wenn es dir gefällt!  
 🐛 **Issues** für Bugs oder Feature-Requests  
 🔀 **Pull Requests** sind willkommen
+```
+
+**Änderungen im Überblick:**
+- **Quick Start** mit Alternativen für alle Paketmanager
+- **Verfügbare Scripts**-Tabelle für direkte Vergleichbarkeit
+- **Versions-History** statt "Vertse-History" (Tippfehler korrigiert)
+- **KI-Provider** aufgelistet (OpenAI, Anthropic, Google, Perplexity, Kimi)
+- Konsistente Formatierung für alle Installationsbefehle
