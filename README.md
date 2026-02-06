@@ -70,7 +70,7 @@
 
 ## 🚀 Quick Start
 
-\`\`\`bash
+```bash
 # Repository klonen
 git clone https://github.com/[username]/bewerbung-generator.git
 
@@ -79,13 +79,13 @@ npm install
 
 # Development-Server starten
 npm run dev
-\`\`\`
+```
 
 Öffne [http://localhost:3000](http://localhost:3000)
 
 ## 📂 Projektstruktur
 
-\`\`\`
+```
 /app
   /(editor)           # Bewerbungs-Editor Routes
   /api                # API Routes (KI-Calls, PDF-Export)
@@ -100,7 +100,7 @@ npm run dev
   /templates          # Template-Logik
 /hooks               # Custom React Hooks
 /types               # TypeScript Interfaces
-\`\`\`
+```
 
 ## 🔒 Datenschutz & Security
 
