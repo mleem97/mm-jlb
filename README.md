@@ -1,214 +1,226 @@
-# Job Letter Builder
+<div align="center">
 
-> 🚀 Ein moderner, datenschutzfreundlicher Bewerbungsgenerator mit Next.js 16 – Erstelle professionelle Anschreiben, Lebensläufe und komplette Bewerbungsmappen direkt im Browser. 100% offline-fähig, keine Daten auf externen Servern.
+# 📄 Job Letter Builder
 
-## ✨ Features
+**Professionelle Bewerbungen erstellen – 100% offline und datenschutzfreundlich.**
 
-### 📄 Dokumenten-Generation
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
+[![Tests](https://img.shields.io/badge/Tests-252%20passing-brightgreen?logo=vitest)](https://vitest.dev)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev)
 
-- **Anschreiben-Editor**: Intuitive Formulare mit Live-Vorschau für verschiedene Anschreiben-Typen (Initiativbewerbung, Stellenanzeige, Praktikum, Ausbildung)
-- **Lebenslauf-Builder**: Modularer Aufbau mit Drag-&-Drop, mehrere Layout-Varianten (klassisch, modern, kreativ)
-- **Deckblatt-Generator**: Optional professionelles Deckblatt mit Foto-Upload
-- **Anlagenverzeichnis**: Automatisch generierte Liste aller Anhänge
-- **Bewerbungs-Mappe**: Zusammenstellung von Anschreiben + Lebenslauf + Anlagen als ZIP-Download
+Erstelle Anschreiben, Lebensläufe und komplette Bewerbungsmappen direkt im Browser.
+Keine Registrierung, keine Cloud, keine Daten auf fremden Servern.
 
-### 💾 Speicherung & Datenschutz
+[Funktionen](#-funktionen) · [Quick Start](#-quick-start) · [Tech Stack](#-tech-stack) · [Contributing](#-contributing)
 
-- **Lokale Speicherung**: Alle Daten werden im Browser (IndexedDB) gespeichert – keine Cloud, keine Server
-- **JSON-Export**: Speichere Bewerbungsprofile als JSON für Backup oder Wiederverwendung
-- **JSON-Import**: Lade vorhandene Profile wieder ein
-- **Versions-History**: Versionsverwaltung mit Zeitstempel, um frühere Entwürfe wiederherzustellen
-- **Daten-Löschung**: Ein-Klick-Löschung aller gespeicherten Daten
+</div>
 
-### 🎨 Vorlagen & Customizing
+---
 
-- **Template-Galerie**: Vorinstallierte, professionelle Designs für verschiedene Branchen
-- **Custom Templates**: Lade eigene Word- oder PDF-Vorlagen hoch (Client-seitige PDF-Manipulation)
-- **Echtzeit-Editor**: Farben, Schriftarten und Layouts direkt anpassen
-- **Dark Mode**: Augenfreundliche Darstellung bei längerer Bearbeitung
+## ✨ Funktionen
 
-### 🤖 KI-Integration (Optional)
+### 📝 10-Schritte Bewerbungs-Assistent
 
-- **AI Writing Assistant**: Mit eigener API-Key generiert die App:
-  - Passende Anschreiben-Texte basierend auf Job-Beschreibung
-  - Lebenslauf-Formulierungen
-  - Keywords-Optimierung für ATS-Systeme
-- **Unterstützte Provider**: OpenAI, Anthropic Claude, Google Gemini, Perplexity, Moonshot Kimi
-- **Stil-Anpassung**: Formal, kreativ, verkürzt, ausführlich wählbar
-- **Hinweis**: API-Key bleibt lokal im Browser, KI-Anfragen werden direkt vom Client aus geführt
-
-### 📥 Import & Datenübernahme
-
-- **LinkedIn-Import**: Import von Profildaten über LinkedIn-Export (CSV/JSON)
-- **XING-Import**: Import von XING-Profildaten
-- **PDF-Parser**: Extrahiere Daten aus vorhandenen PDF-Lebensläufen (Client-seitige OCR)
-- **JSON-Profile**: Wiederverwendbare Profile für verschiedene Bewerbungen
-
-### 📧 Versand & Export
-
-- **PDF-Export**: Hochwertige, druckoptimierte PDFs (Einzelseiten oder Mappe)
-- **ZIP-Export**: Komplette Bewerbung mit Anschreiben, Lebenslauf und Anlagen als ZIP
-- **E-Mail-Versand**: Direkter Versand über eigenen IMAP/SMTP-Server (kein externer Mail-Service)
-  - Anhänge automatisch anhängen
-  - Betreffzeile individuell anpassbar
-  - E-Mail-Text-Vorlagen
-- **Teilen**: Generiere temporäre Links (via Data-URL) für direkte Vorschau
-
-### 🛠️ Bewerbungs-Management
-
-- **Bewerbungs-Tracker**: Verwalte alle versendeten Bewerbungen mit Status (gesendet, in Prüfung, Absage, Einladung)
-- **Unternehmens-Datenbank**: Speichere Firmen-Informationen für spätere Nachfass-E-Mails
-- **Fristen-Übersicht**: Kalenderansicht mit Deadlines für Bewerbungseingänge
-- **Nachfass-Reminder**: Erinnere dich an Follow-Up-E-Mails nach definiertem Zeitraum
-
-## 🛠️ Tech Stack
-
-| Bereich | Technologie |
+| Schritt | Funktion |
 | --- | --- |
-| Framework | **Next.js 16.1.6** (App Router, Server Components) |
-| Sprache | **TypeScript** (strict mode) |
-| Styling | **Tailwind CSS 4.2** |
-| State | **Zustand** + React Context |
-| Formulare | **React Hook Form** + **Zod** Validation |
-| PDF | **@react-pdf/renderer** (React-Komponenten zu PDF) |
-| Datenbank | **IndexedDB** (Dexie.js für einfache API) |
-| KI | OpenAI, Anthropic, Google, Perplexity, Kimi (Client-seitig, API-Key erforderlich) |
-| E-Mail | **Nodemailer** (für Server Actions) oder **EmailJS** (Client-seitig) |
-| Icons | Lucide React |
-| UI-Komponenten | shadcn/ui (optional anpassbar) |
+| 1. Persönliche Daten | Name, Kontakt, Adresse, Foto-Upload mit Komprimierung |
+| 2. Berufserfahrung | Positionen mit Drag-&-Drop, automatische Lückenerkennung |
+| 3. Bildungsweg | Abschlüsse sortiert nach Relevanz, Smart Tips |
+| 4. Skills | 300+ Vorschläge (Hard, Digital, Green, Soft Skills + Sprachen) |
+| 5. Zertifikate & Projekte | Portfolio mit Datei-Upload in IndexedDB |
+| 6. Anschreiben | Stelleninfos, manueller Editor, Pflichtangaben 2026 |
+| 7. Layout & Design | 3 Templates, Farbpaletten, Schriftarten, Live-Preview |
+| 8. Anlagen | Drag-&-Drop Upload, Kategorisierung, Anlagenverzeichnis |
+| 9. Export | PDF, ZIP, JSON – mit Bewerbungstracker |
+| 10. Abschluss | Zusammenfassung, Feedback, Konfetti 🎉 |
+
+### 🔒 Datenschutz
+
+- **100% lokal** – alle Daten bleiben im Browser (localStorage + IndexedDB)
+- **Kein Tracking** – keine Analytics, keine Cookies
+- **Kein Server** – keine Registrierung, kein Account nötig
+- **DSGVO-konform** – Datenschutz-Hinweis beim ersten Start
+- **Ein-Klick-Löschung** aller gespeicherten Daten
+
+### 📊 Analyse-Tools
+
+- **ATS-Score** – Keyword-Analyse für Bewerbermanagementsysteme
+- **Job-Match-Score** – Abgleich deiner Skills mit der Stellenbeschreibung
+- **Tonalitäts-Check** – Formalität, Floskeln, Zeichenlänge prüfen
+- **Lücken-Erkennung** – Automatische Warnung bei Karrierelücken > 3 Monate
+
+### 📥 Import & Export
+
+- **JSON Import/Export** – Profile sichern und wiederverwenden
+- **ZIP Export** – Komplette Bewerbungsmappe (Anschreiben + CV + Anlagen)
+- **PDF Export** – Druckoptimierte PDFs mit `@react-pdf/renderer`
+- **LinkedIn/XING Parser** – CSV-Import von Profildaten
+- **Kalender-Export** – iCal-Dateien für Nachfass-Reminder
+
+---
 
 ## 🚀 Quick Start
 
-Wähle deinen bevorzugten Paketmanager:
+### Voraussetzungen
+
+- [Node.js](https://nodejs.org) 18+
+- [pnpm](https://pnpm.io) 10+ (empfohlen)
+
+### Installation
 
 ```bash
 # Repository klonen
 git clone https://github.com/mleem97/mm-jlb.git
-
-# In das Projektverzeichnis wechseln
 cd mm-jlb
 
 # Dependencies installieren
-npm install
-# oder: pnpm install
-# oder: yarn install
-# oder: bun install
+pnpm install
 
 # Entwicklungsserver starten
-npm run dev
-# oder: pnpm dev
-# oder: yarn dev
-# oder: bun dev
+pnpm dev
 ```
 
 Öffne [http://localhost:3000](http://localhost:3000) im Browser.
 
-### Umgebungsvariablen (optional)
+### Scripts
 
-Für KI-Features erstelle eine `.env.local`:
-
-```bash
-# .env.local erstellen
-cp .env.example .env.local
-
-# Deinen API-Key eintragen (z.B. OpenAI)
-OPENAI_API_KEY=sk-...
-```
-
-### Verfügbare Scripts
-
-| Befehl | npm | pnpm | yarn | bun |
-| --- | --- | --- | --- | --- |
-| Dev-Server | `npm run dev` | `pnpm dev` | `yarn dev` | `bun dev` |
-| Build | `npm run build` | `pnpm build` | `yarn build` | `bun run build` |
-| Start (Prod) | `npm start` | `pnpm start` | `yarn start` | `bun start` |
-| Lint | `npm run lint` | `pnpm lint` | `yarn lint` | `bun run lint` |
-| Type-Check | `npm run type-check` | `pnpm type-check` | `yarn type-check` | `bun run type-check` |
-
-## 📂 Projektstruktur
-
-```text
-/app
- /(editor)           # Bewerbungs-Editor Routes
- /api                # API Routes (KI-Calls, PDF-Export)
- /preview            # Live-Vorschau Komponenten
-/components
- /forms              # Formular-Komponenten
- /templates          # Anschreiben-/Lebenslauf-Vorlagen
- /pdf                # PDF-Renderer Komponenten
-/lib
- /db                 # IndexedDB Wrapper (Dexie)
- /validators         # Zod Schemas
- /templates          # Template-Logik
-/hooks               # Custom React Hooks
-/types               # TypeScript Interfaces
-```
-
-## 🔒 Datenschutz & Security
-
-- ✅ **Zero-Server-Storage**: Keine persönlichen Daten verlassen den Browser
-- ✅ **API-Keys lokal**: KI-Schlüssel werden nur im LocalStorage gespeichert
-- ✅ **Kein Tracking**: Keine Analytics, keine Cookies ohne Zustimmung
-- ✅ **Export-Kontrolle**: Du bestimmst, wohin deine Daten gehen
-- ✅ **Offline-fähig**: Funktioniert ohne Internet nach dem ersten Laden (PWA)
-
-## 📋 Roadmap
-
-### Phase 1 – Core (MVP)
-
-- [x] Anschreiben-Editor mit Live-Vorschau
-- [x] Lebenslauf-Builder mit Basis-Templates
-- [x] PDF-Export (Einzeldateien)
-- [x] Lokale IndexedDB-Speicherung
-- [x] JSON Export/Import
-
-### Phase 2 – Advanced Features
-
-- [ ] Eigene Vorlagen hochladen (PDF-Manipulation)
-- [ ] ZIP-Export kompletter Bewerbungsmappen
-- [ ] Bewerbungs-Tracker mit Status-Verwaltung
-- [ ] Templates für verschiedene Branchen
-
-### Phase 3 – KI & Integrationen
-
-- [ ] AI Writing Assistant (mit eigener API-Key)
-- [ ] LinkedIn/XING-Profil-Import
-- [ ] ATS-Optimierung (Keyword-Analyse)
-- [ ] PDF-Parser für bestehende Lebensläufe
-
-### Phase 4 – Versand & Workflow
-
-- [ ] E-Mail-Versand über eigenen IMAP/SMTP
-- [ ] Kalender-Integration für Fristen
-- [ ] Follow-Up-Reminder
-- [ ] PWA-Features (Offline-Nutzung)
-
-### Phase 5 – Collaboration
-
-- [ ] Cloud-Sync (optional, verschlüsselt)
-- [ ] Teilen von Templates mit Community
-- [ ] Multi-Language Support (DE, EN, FR)
-
-## 💡 Use Cases
-
-- **Job-Suchende**: Schnelle Erstellung professioneller Bewerbungsunterlagen
-- **Berufseinsteiger**: Leitfaden für die erste Bewerbung mit Templates
-- **Karriere-Wechsler**: Anpassbare Profile für verschiedene Branchen
-- **Recruiter**: Schnelle Erstellung von Stellenanzeigen-Beispielen
-- **Bewerbungs-Coaches**: Tool für Workshops und Einzelberatungen
-- **Schüler/Studenten**: Praktikums- und Ausbildungsbewerbungen
-
-## 📄 Lizenz
-
-MIT License – Nutzung, Modifikation und Weiterverbreitung erlaubt.
-
-## 👤 Autor
-
-Entwickelt mit ❤️ in Hannover  
-[Meyer Media](https://meyer-media.de) – Digitale Lösungen für Kreative
+| Script | Beschreibung |
+| --- | --- |
+| `pnpm dev` | Entwicklungsserver starten |
+| `pnpm build` | Produktions-Build erstellen |
+| `pnpm start` | Produktions-Server starten |
+| `pnpm lint` | ESLint prüfen |
+| `pnpm type-check` | TypeScript Fehler prüfen |
+| `pnpm test:unit` | Unit-Tests ausführen (Vitest) |
+| `pnpm test:unit:watch` | Tests im Watch-Modus |
+| `pnpm test:unit:ui` | Tests mit Vitest UI |
 
 ---
 
-⭐ **Star** das Repository, wenn es dir gefällt!  
-🐛 **Issues** für Bugs oder Feature-Requests  
-🔀 **Pull Requests** sind willkommen
+## 🛠 Tech Stack
+
+| Bereich | Technologie |
+| --- | --- |
+| Framework | [Next.js 16](https://nextjs.org) (App Router, Turbopack) |
+| Sprache | [TypeScript 5](https://www.typescriptlang.org) (strict mode) |
+| UI | [React 19](https://react.dev) + [shadcn/ui](https://ui.shadcn.com) |
+| Styling | [Tailwind CSS 4](https://tailwindcss.com) |
+| State | [Zustand 5](https://zustand.docs.pmnd.rs) mit localStorage-Persist |
+| Formulare | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) |
+| PDF | [@react-pdf/renderer](https://react-pdf.org) |
+| Datenbank | [Dexie.js](https://dexie.org) (IndexedDB-Wrapper) |
+| Drag & Drop | [@dnd-kit](https://dndkit.com) |
+| Animationen | [Motion](https://motion.dev) (Framer Motion) |
+| Icons | [Lucide React](https://lucide.dev) |
+| Tests | [Vitest](https://vitest.dev) + Testing Library |
+| Paketmanager | [pnpm](https://pnpm.io) |
+
+---
+
+## 📂 Projektstruktur
+
+```
+mm-jlb/
+├── app/                          # Next.js App Router
+│   ├── (builder)/                # Bewerbungs-Builder (Route Group)
+│   │   ├── phases/steps/         # 10 Wizard-Schritte
+│   │   ├── dashboard/            # Bewerbungstracker
+│   │   └── intro/                # Onboarding
+│   ├── about/                    # Info-Seiten
+│   ├── datenschutz/              # Datenschutzerklärung
+│   ├── impressum/                # Impressum
+│   ├── layout.tsx                # Root Layout
+│   └── page.tsx                  # Landing Page
+├── components/
+│   ├── ui/                       # shadcn/ui Basiskomponenten
+│   ├── features/                 # Feature-Komponenten (ATS, Privacy, etc.)
+│   ├── site/                     # Header, Footer
+│   └── layout/                   # Layout-Helfer
+├── hooks/                        # Custom React Hooks
+├── lib/
+│   ├── data/                     # Skill-Datenbank, Templates, Farben
+│   ├── db/                       # IndexedDB (Dexie) Setup
+│   ├── export/                   # PDF-, JSON-, ZIP-Export
+│   ├── importers/                # LinkedIn, XING, CSV Parser
+│   ├── schemas/                  # Zod Validierungsschemas
+│   └── utils/                    # Hilfsfunktionen
+├── store/                        # Zustand Store
+├── types/                        # TypeScript Definitionen
+├── __tests__/                    # Unit-Tests (252 Tests)
+├── package.json
+├── tsconfig.json
+└── vitest.config.ts
+```
+
+---
+
+## 🧪 Tests
+
+Das Projekt hat **252 Unit-Tests** mit Vitest:
+
+```bash
+# Alle Tests ausführen
+pnpm test:unit
+
+# Tests im Watch-Modus
+pnpm test:unit:watch
+
+# Tests mit Browser-UI
+pnpm test:unit:ui
+```
+
+Getestet werden:
+
+- Alle Zod-Validierungsschemas (7 Schema-Dateien)
+- Store-Actions und State-Management
+- Import-Parser (CSV, LinkedIn, XING)
+- Utility-Funktionen (ATS-Check, Gap Detection, etc.)
+
+---
+
+## 🤝 Contributing
+
+Beiträge sind willkommen! Lies bitte zuerst die [Contributing-Richtlinien](CONTRIBUTING.md).
+
+```bash
+# Fork klonen
+git clone https://github.com/<dein-user>/mm-jlb.git
+cd mm-jlb
+pnpm install
+
+# Feature-Branch erstellen
+git checkout -b feat/mein-feature
+
+# Checks vor dem Commit
+pnpm type-check && pnpm lint && pnpm test:unit
+```
+
+---
+
+## 📋 Roadmap
+
+- [ ] KI-Assistent für Anschreiben (OpenAI, Anthropic, Gemini – mit eigenem API-Key)
+- [ ] E-Mail-Versand über eigenen SMTP-Server
+- [ ] PDF/A-Kompatibilität für ATS-Systeme
+- [ ] Foto-Zuschnitt-Dialog
+- [ ] Mehrsprachigkeit (EN, FR)
+- [ ] PWA mit Offline-Support
+- [ ] E2E-Tests mit Playwright
+
+---
+
+## 📄 Lizenz
+
+MIT License – siehe [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+Entwickelt mit ❤️ von [Meyer Media](https://meyer-media.de)
+
+⭐ **Star** das Repo, wenn es dir gefällt · 🐛 [Issues](https://github.com/mleem97/mm-jlb/issues) · 🔀 [Pull Requests](https://github.com/mleem97/mm-jlb/pulls)
+
+</div>
