@@ -1,0 +1,75 @@
+{
+  "version": "1.1",
+  "created_at": "2026-02-06T13:15:00Z",
+  "locale": "de-DE",
+  "personal": {
+    "names": [{ "firstName": "Max", "lastName": "Mustermann", "type": "legal" }],
+    "emails": [{ "value": "max.mustermann@example.com", "type": "primary" }],
+    "phones": [{ "value": "+49 170 1234567", "type": "mobile" }],
+    "addresses": [
+      {
+        "street": "Musterstraße 1",
+        "zip": "30159",
+        "city": "Hannover",
+        "country": "DE",
+        "type": "primary"
+      }
+    ]
+  },
+  "experience": [
+    {
+      "company": "Acme IT GmbH",
+      "position": "Full-Stack Developer",
+      "location": "Hannover",
+      "from": "2023-01",
+      "to": "present",
+      "descriptions": [
+        "Entwicklung von Next.js-Frontends für B2B-SaaS",
+        "Design und Betrieb von REST/GraphQL-APIs (Node.js)"
+      ],
+      "achievements": [
+        "Core-Web-Vitals um 35% verbessert"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Hochschule Hannover",
+      "degree": "B.Sc. Informatik",
+      "field": "Software Engineering",
+      "from": "2016-10",
+      "to": "2020-06"
+    }
+  ],
+  "skills": {
+    "technical": ["Next.js", "TypeScript", "Node.js"],
+    "languages": [
+      { "name": "Deutsch", "level": "Muttersprache" },
+      { "name": "Englisch", "level": "C1" }
+    ],
+    "soft": ["Teamfähigkeit", "Problemlösung"]
+  },
+  "coverLetters": [
+    {
+      "company": {
+        "name": "Muster GmbH",
+        "addresses": [
+          { "street": "Innovationsweg 5", "zip": "30165", "city": "Hannover", "country": "DE" }
+        ]
+      },
+      "contactPeople": [
+        { "salutation": "Herr", "firstName": "Jan", "lastName": "Beispiel" }
+      ],
+      "position": "Senior Frontend Developer",
+      "referenceIds": ["REQ-2026-041"],
+      "sources": ["LinkedIn"],
+      "motivations": ["Ich möchte moderne, performante Web-UIs entwickeln."],
+      "startDates": ["2026-04-01"],
+      "salaryExpectations": ["55.000-65.000 EUR brutto/Jahr"],
+      "availabilities": ["Mo-Do vormittags"]
+    }
+  ],
+  "meta": {
+    "storage": "local-only"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "version": "1.1",
+  "created_at": "2026-02-06T13:15:00Z",
+  "locale": "de-DE",
+  "personal": {
+    "names": [
+      { "firstName": "Max", "lastName": "Mustermann", "type": "legal" },
+      { "firstName": "Maximilian", "lastName": "Mustermann", "type": "full" }
+    ],
+    "emails": [
+      { "value": "max.mustermann@example.com", "type": "primary" },
+      { "value": "max@mustermann.dev", "type": "portfolio" }
+    ],
+    "phones": [
+      { "value": "+49 170 1234567", "type": "mobile" },
+      { "value": "+49 511 12345678", "type": "landline" }
+    ],
+    "addresses": [
+      {
+        "street": "Musterstraße 1",
+        "zip": "30159",
+        "city": "Hannover",
+        "country": "DE",
+        "type": "primary"
+      }
+    ],
+    "birth": [
+      { "date": "1995-03-15", "place": "Hannover", "type": "optional" }
+    ],
+    "nationalities": ["Deutsch"],
+    "links": [
+      { "label": "LinkedIn", "url": "https://linkedin.com/in/max-mustermann" },
+      { "label": "GitHub", "url": "https://github.com/maxmustermann" },
+      { "label": "Portfolio", "url": "https://maxmustermann.dev" }
+    ],
+    "photos": [
+      { "label": "Bewerbungsfoto", "data": "base64:...optional..." }
+    ]
+  },
+  "experience": [
+    {
+      "company": "Acme IT GmbH",
+      "position": "Full-Stack Developer",
+      "location": "Hannover",
+      "from": "2023-01",
+      "to": "present",
+      "descriptions": [
+        "Entwicklung von Next.js-Frontends für B2B-SaaS",
+        "Design und Betrieb von REST/GraphQL-APIs (Node.js)",
+        "CI/CD-Pipelines mit GitHub Actions, Docker"
+      ],
+      "achievements": [
+        "Core-Web-Vitals um 35% verbessert",
+        "Build-Zeit von 12 auf 6 Minuten reduziert"
+      ]
+    },
+    {
+      "company": "Muster Solutions AG",
+      "position": "Software Engineer",
+      "location": "Hildesheim",
+      "from": "2020-07",
+      "to": "2022-12",
+      "descriptions": [
+        "Refactoring von Legacy-Services (Java -> Node.js)",
+        "Automatisierte Tests mit Jest und Playwright"
+      ],
+      "achievements": [
+        "Ausfallzeiten um 25% reduziert"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Hochschule Hannover",
+      "degree": "B.Sc. Informatik",
+      "field": "Software Engineering",
+      "from": "2016-10",
+      "to": "2020-06",
+      "grade": "2.1",
+      "highlights": [
+        "Schwerpunkt Web-Engineering",
+        "Abschlussarbeit: Micro-Frontend-Architektur"
+      ]
+    },
+    {
+      "institution": "Berufsbildende Schule Beispielstadt",
+      "degree": "Fachabitur",
+      "field": "IT-Technik",
+      "from": "2014-08",
+      "to": "2016-06",
+      "grade": "2.3",
+      "highlights": []
+    }
+  ],
+  "skills": {
+    "technical": ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "Docker", "CI/CD"],
+    "digital": ["Prompt-Engineering", "LLM-Tooling", "Datenanalyse (Python, Pandas)"],
+    "languages": [
+      { "name": "Deutsch", "level": "Muttersprache" },
+      { "name": "Englisch", "level": "C1" }
+    ],
+    "green": ["Green IT", "Nachhaltige Cloud-Architektur"],
+    "soft": ["Teamfähigkeit", "Kommunikation", "Problemlösung", "Mentoring"]
+  },
+  "coverLetters": [
+    {
+      "company": {
+        "name": "Muster GmbH",
+        "addresses": [
+          { "street": "Innovationsweg 5", "zip": "30165", "city": "Hannover", "country": "DE" }
+        ]
+      },
+      "contactPeople": [
+        { "salutation": "Herr", "title": "Dr.", "firstName": "Jan", "lastName": "Beispiel" }
+      ],
+      "position": "Senior Frontend Developer",
+      "referenceIds": ["REQ-2026-041"],
+      "sources": ["LinkedIn"],
+      "motivations": [
+        "Ich möchte moderne, performante Web-UIs entwickeln und skalierten Nutzerwert schaffen."
+      ],
+      "startDates": ["2026-04-01"],
+      "salaryExpectations": ["55.000-65.000 EUR brutto/Jahr"],
+      "availabilities": ["Mo-Do vormittags"]
+    }
+  ],
+  "attachments": {
+    "certificates": [
+      { "title": "AWS Certified Developer - Associate", "issuer": "AWS", "date": "2024-09", "file": "base64:...optional..." }
+    ],
+    "references": [
+      { "name": "Lisa Beispiel", "role": "Team Lead", "company": "Acme IT GmbH", "contact": "referenz@example.com", "file": "base64:...optional..." }
+    ],
+    "projectLists": [
+      {
+        "title": "Projektliste 2024",
+        "items": [
+          { "name": "B2B Analytics Dashboard", "summary": "Realtime-KPIs, React/Next.js", "links": ["https://github.com/maxmustermann/b2b-dashboard"] }
+        ]
+      }
+    ],
+    "workSamples": [
+      { "title": "Landing Page Redesign", "link": "https://maxmustermann.dev/work/landing" }
+    ]
+  },
+  "meta": {
+    "storage": "local-only",
+    "notes": "Keine Angaben zu Familienstand, Kindern, Religion, Eltern."
+  }
+}
