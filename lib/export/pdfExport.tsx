@@ -46,8 +46,21 @@ interface CoverPageProps {
 //  COVER PAGE (shared across all templates)
 // ═══════════════════════════════════════════════════════════
 
+// DIN 5008 margins: left 25mm, right 20mm, top/bottom 20mm
+// 1mm ≈ 2.83465 points
+const DIN_MARGIN_LEFT = 70.87; // 25mm
+const DIN_MARGIN_RIGHT = 56.69; // 20mm
+const DIN_MARGIN_TOP = 56.69; // 20mm
+const DIN_MARGIN_BOTTOM = 56.69; // 20mm
+
 const coverPageStyles = StyleSheet.create({
-  page: { padding: 60, fontFamily: "Helvetica" },
+  page: {
+    paddingLeft: DIN_MARGIN_LEFT,
+    paddingRight: DIN_MARGIN_RIGHT,
+    paddingTop: DIN_MARGIN_TOP,
+    paddingBottom: DIN_MARGIN_BOTTOM,
+    fontFamily: "Helvetica",
+  },
   center: {
     flex: 1,
     justifyContent: "center",
@@ -55,20 +68,21 @@ const coverPageStyles = StyleSheet.create({
   },
   photo: {
     width: 120,
-    height: 120,
-    borderRadius: 60,
+    height: 160,
     objectFit: "cover",
     marginBottom: 24,
+    border: "1pt solid #ccc",
   },
-  title: { fontSize: 30, marginBottom: 8 },
-  subtitle: { fontSize: 16, color: "#4a5568", marginBottom: 30 },
-  line: { width: 60, height: 2, marginBottom: 30 },
-  name: { fontSize: 14, marginBottom: 4 },
+  title: { fontSize: 36, marginBottom: 10, letterSpacing: 2, textTransform: "uppercase", fontFamily: "Helvetica-Bold" },
+  subtitle: { fontSize: 18, color: "#666666", marginBottom: 40 },
+  line: { width: 60, height: 2, marginBottom: 40, backgroundColor: "#333333" },
+  name: { fontSize: 14, marginBottom: 4, fontFamily: "Helvetica-Bold" },
   detail: {
-    fontSize: 11,
-    color: "#4a5568",
+    fontSize: 12,
+    color: "#333333",
     marginBottom: 3,
     textAlign: "center",
+    lineHeight: 1.6,
   },
 });
 
@@ -78,12 +92,13 @@ function CoverPageSection({ personalData, jobPosting, layout }: CoverPageProps) 
   return (
     <Page
       size="A4"
-      style={{ ...coverPageStyles.page, fontFamily: font.regular }}
+      style={{
+        ...coverPageStyles.page,
+        fontFamily: font.regular,
+        fontSize: layout.fontSize,
+      }}
     >
       <View style={coverPageStyles.center}>
-        {personalData.photo && (
-          <Image src={personalData.photo} style={coverPageStyles.photo} />
-        )}
         <Text
           style={{
             ...coverPageStyles.title,
@@ -94,9 +109,12 @@ function CoverPageSection({ personalData, jobPosting, layout }: CoverPageProps) 
           Bewerbung
         </Text>
         {jobPosting?.jobTitle && (
-          <Text style={coverPageStyles.subtitle}>
+          <Text style={{ ...coverPageStyles.subtitle, color: layout.secondaryColor }}>
             als {jobPosting.jobTitle}
           </Text>
+        )}
+        {personalData.photo && layout.showPhoto && (
+          <Image src={personalData.photo} style={coverPageStyles.photo} />
         )}
         <View
           style={{
@@ -109,27 +127,30 @@ function CoverPageSection({ personalData, jobPosting, layout }: CoverPageProps) 
         >
           {fullName}
         </Text>
-        {personalData.email && (
-          <Text style={coverPageStyles.detail}>{personalData.email}</Text>
-        )}
-        {personalData.phone && (
-          <Text style={coverPageStyles.detail}>{personalData.phone}</Text>
-        )}
-        {(personalData.address.street || personalData.address.city) && (
+        {personalData.address.street && (
           <Text style={coverPageStyles.detail}>
-            {[
-              personalData.address.street,
-              `${personalData.address.zip} ${personalData.address.city}`,
-            ]
-              .filter(Boolean)
-              .join(", ")}
+            {personalData.address.street}
           </Text>
         )}
+        {(personalData.address.zip || personalData.address.city) && (
+          <Text style={coverPageStyles.detail}>
+            {personalData.address.zip} {personalData.address.city}
+          </Text>
+        )}
+        {personalData.phone && (
+          <Text style={coverPageStyles.detail}>Tel.: {personalData.phone}</Text>
+        )}
+        {personalData.email && (
+          <Text style={coverPageStyles.detail}>E-Mail: {personalData.email}</Text>
+        )}
         {jobPosting?.companyName && (
-          <Text style={{ ...coverPageStyles.detail, marginTop: 20 }}>
+          <Text style={{ ...coverPageStyles.detail, marginTop: 30, fontFamily: font.bold }}>
             bei {jobPosting.companyName}
           </Text>
         )}
+        <Text style={{ ...coverPageStyles.detail, marginTop: 30, fontSize: 10 }}>
+          Anlagen:{"\n"}Lebenslauf{"\n"}Zeugnisse
+        </Text>
       </View>
     </Page>
   );
@@ -141,28 +162,51 @@ function CoverPageSection({ personalData, jobPosting, layout }: CoverPageProps) 
 
 const clStyles = StyleSheet.create({
   page: {
-    padding: 50,
+    paddingLeft: DIN_MARGIN_LEFT,
+    paddingRight: DIN_MARGIN_RIGHT,
+    paddingTop: DIN_MARGIN_TOP,
+    paddingBottom: DIN_MARGIN_BOTTOM,
     fontFamily: "Helvetica",
     fontSize: 11,
-    lineHeight: 1.6,
+    lineHeight: 1.4,
   },
-  sender: { marginBottom: 28, fontSize: 10, lineHeight: 1.5 },
-  recipient: { marginBottom: 20, fontSize: 10, lineHeight: 1.5 },
-  date: {
+  senderHeader: {
     textAlign: "right",
     fontSize: 10,
-    color: "#4a5568",
-    marginBottom: 24,
+    lineHeight: 1.4,
+    marginBottom: 14,
+    color: "#555555",
   },
-  subject: { fontSize: 12, marginBottom: 18 },
+  // Adressfeld nach DIN 5008: Position 45mm von oben, 25mm von links
+  addressBlock: {
+    position: "absolute",
+    top: 127.56, // 45mm from top
+    left: DIN_MARGIN_LEFT,
+    width: 240.95, // 85mm
+    height: 113.39, // 40mm
+  },
+  senderSmall: {
+    fontSize: 7,
+    textDecoration: "underline",
+    marginBottom: 14,
+    color: "#333333",
+  },
+  recipient: { fontSize: 11, lineHeight: 1.4 },
+  date: {
+    textAlign: "right",
+    fontSize: 11,
+    marginTop: 170, // Damit es unterhalb des Adressfelds ist
+    marginBottom: 56,
+  },
+  subject: { fontSize: 12, marginBottom: 20, fontFamily: "Helvetica-Bold" },
   body: {
     fontSize: 11,
-    lineHeight: 1.7,
-    marginBottom: 8,
-    textAlign: "justify",
+    lineHeight: 1.4,
+    marginBottom: 11,
+    textAlign: "left",
   },
-  signature: { marginTop: 36, fontSize: 11 },
-  attachments: { marginTop: 36, fontSize: 9, color: "#718096" },
+  signature: { marginTop: 42, fontSize: 11 },
+  attachments: { marginTop: 42, fontSize: 10, fontFamily: "Helvetica-Bold" },
 });
 
 function CoverLetterSection({
@@ -187,104 +231,113 @@ function CoverLetterSection({
         .join("\n\n");
 
   const subject = jobPosting?.jobTitle
-    ? `Bewerbung als ${jobPosting.jobTitle}`
+    ? `Bewerbung als ${jobPosting.jobTitle}${jobPosting.referenceNumber ? ` – Referenznummer: ${jobPosting.referenceNumber}` : ""}`
     : "Bewerbung";
 
   return (
     <Page
       size="A4"
-      style={{ ...clStyles.page, fontFamily: font.regular }}
+      style={{
+        ...clStyles.page,
+        fontFamily: font.regular,
+        fontSize: layout.fontSize,
+        lineHeight: 1.4,
+      }}
     >
-      {/* Sender */}
-      <View style={clStyles.sender}>
-        <Text style={{ fontFamily: font.bold }}>{fullName}</Text>
-        {personalData.address.street && (
-          <Text>{personalData.address.street}</Text>
-        )}
+      {/* Sender in header (top right) - DIN 5008 */}
+      <View style={{ ...clStyles.senderHeader, fontFamily: font.regular }}>
+        <Text>{fullName}</Text>
+        {personalData.address.street && <Text>{personalData.address.street}</Text>}
         {(personalData.address.zip || personalData.address.city) && (
           <Text>
             {personalData.address.zip} {personalData.address.city}
           </Text>
         )}
-        {personalData.email && <Text>{personalData.email}</Text>}
-        {personalData.phone && <Text>{personalData.phone}</Text>}
+        {personalData.phone && <Text>Tel.: {personalData.phone}</Text>}
+        {personalData.email && <Text>E-Mail: {personalData.email}</Text>}
       </View>
 
-      {/* Recipient */}
-      {jobPosting && (
-        <View style={clStyles.recipient}>
-          {jobPosting.companyName && (
-            <Text style={{ fontFamily: font.bold }}>
-              {jobPosting.companyName}
-            </Text>
-          )}
-          {jobPosting.contactPerson && (
-            <Text>{jobPosting.contactPerson}</Text>
-          )}
-          {jobPosting.companyAddress?.street && (
-            <Text>{jobPosting.companyAddress.street}</Text>
-          )}
-          {(jobPosting.companyAddress?.zip ||
-            jobPosting.companyAddress?.city) && (
-            <Text>
-              {jobPosting.companyAddress?.zip}{" "}
-              {jobPosting.companyAddress?.city}
-            </Text>
-          )}
-        </View>
-      )}
+      {/* Address block (for window envelope) - DIN 5008 position */}
+      <View style={clStyles.addressBlock}>
+        <Text style={clStyles.senderSmall}>
+          {fullName} • {personalData.address.street} • {personalData.address.zip}{" "}
+          {personalData.address.city}
+        </Text>
+        {jobPosting && (
+          <View style={clStyles.recipient}>
+            {jobPosting.companyName && (
+              <Text style={{ fontFamily: font.bold }}>
+                {jobPosting.companyName}
+              </Text>
+            )}
+            {jobPosting.contactPerson && <Text>{jobPosting.contactPerson}</Text>}
+            {jobPosting.companyAddress?.street && (
+              <Text>{jobPosting.companyAddress.street}</Text>
+            )}
+            {(jobPosting.companyAddress?.zip || jobPosting.companyAddress?.city) && (
+              <Text style={{ fontFamily: font.bold }}>
+                {jobPosting.companyAddress?.zip} {jobPosting.companyAddress?.city}
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
 
-      {/* Date */}
-      <Text style={clStyles.date}>
-        {personalData.address.city
-          ? `${personalData.address.city}, `
-          : ""}
+      {/* Date - DIN 5008: right-aligned, below address block */}
+      <Text style={{ ...clStyles.date, fontFamily: font.regular }}>
+        {personalData.address.city ? `${personalData.address.city}, ` : ""}
         {today}
       </Text>
 
-      {/* Subject */}
-      <Text style={{ ...clStyles.subject, fontFamily: font.bold }}>
+      {/* Subject - bold, DIN 5008 */}
+      <Text style={{ ...clStyles.subject, fontFamily: font.bold, fontSize: layout.fontSize + 1 }}>
         {subject}
       </Text>
 
       {/* Salutation */}
-      <Text style={clStyles.body}>
+      <Text style={{ ...clStyles.body, fontFamily: font.regular, fontSize: layout.fontSize }}>
         {jobPosting?.contactPerson
           ? `Sehr geehrte/r ${jobPosting.contactPerson},`
           : "Sehr geehrte Damen und Herren,"}
       </Text>
 
-      {/* Body */}
+      {/* Body paragraphs */}
       {letterText
         .split("\n")
-        .filter(Boolean)
+        .filter((p) => p.trim().length > 0)
         .map((p, i) => (
-          <Text key={`cl-p-${i}`} style={clStyles.body}>
+          <Text key={`cl-p-${i}`} style={{ ...clStyles.body, fontSize: layout.fontSize }}>
             {p}
           </Text>
         ))}
 
+      {/* Closing with metadata */}
+      {(coverLetterMeta?.entryDate || coverLetterMeta?.salaryExpectation) && (
+        <Text style={{ ...clStyles.body, fontSize: layout.fontSize }}>
+          {[
+            coverLetterMeta?.salaryExpectation
+              ? `Meine Gehaltsvorstellung liegt bei ${coverLetterMeta.salaryExpectation}.`
+              : "",
+            coverLetterMeta?.entryDate
+              ? `Ich stehe Ihnen ab dem ${coverLetterMeta.entryDate} zur Verfügung.`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        </Text>
+      )}
+
       {/* Signature */}
       <View style={clStyles.signature}>
-        <Text>Mit freundlichen Grüßen</Text>
-        <Text style={{ marginTop: 24, fontFamily: font.bold }}>
+        <Text style={{ fontSize: layout.fontSize }}>Mit freundlichen Grüßen</Text>
+        <Text style={{ marginTop: 42, fontFamily: font.bold, fontSize: layout.fontSize + 4 }}>
           {fullName}
         </Text>
       </View>
 
       {/* Attachments */}
       <View style={clStyles.attachments}>
-        <Text>Anlagen: Lebenslauf</Text>
-        {coverLetterMeta?.entryDate && (
-          <Text>
-            Frühester Eintrittstermin: {coverLetterMeta.entryDate}
-          </Text>
-        )}
-        {coverLetterMeta?.salaryExpectation && (
-          <Text>
-            Gehaltsvorstellung: {coverLetterMeta.salaryExpectation}
-          </Text>
-        )}
+        <Text style={{ fontSize: layout.fontSize - 1 }}>Anlagen</Text>
       </View>
     </Page>
   );
@@ -314,11 +367,14 @@ function ClassicCV({ state, layout }: CVProps) {
 
   const s = StyleSheet.create({
     page: {
-      padding: 40,
+      paddingLeft: DIN_MARGIN_LEFT,
+      paddingRight: DIN_MARGIN_RIGHT,
+      paddingTop: DIN_MARGIN_TOP,
+      paddingBottom: DIN_MARGIN_BOTTOM,
       fontFamily: font.regular,
       fontSize: fs,
-      lineHeight: 1.5,
-      color: "#1a202c",
+      lineHeight: 1.4,
+      color: "#000000",
     },
     header: {
       flexDirection: "row",
@@ -627,8 +683,8 @@ function ModernCV({ state, layout }: CVProps) {
     page: {
       fontFamily: font.regular,
       fontSize: fs,
-      lineHeight: 1.5,
-      color: "#1a202c",
+      lineHeight: 1.4,
+      color: "#000000",
     },
     accentBar: {
       position: "absolute",
@@ -640,7 +696,7 @@ function ModernCV({ state, layout }: CVProps) {
     },
     headerBg: {
       backgroundColor: pc,
-      padding: "24 40 20 46",
+      padding: `24 ${DIN_MARGIN_RIGHT} 20 ${DIN_MARGIN_LEFT}`,
       flexDirection: "row",
       alignItems: "center",
     },
@@ -664,7 +720,12 @@ function ModernCV({ state, layout }: CVProps) {
       borderWidth: 2,
       borderColor: "#ffffff80",
     },
-    body: { padding: "16 40 30 46" },
+    body: {
+      paddingLeft: DIN_MARGIN_LEFT,
+      paddingRight: DIN_MARGIN_RIGHT,
+      paddingTop: 16,
+      paddingBottom: DIN_MARGIN_BOTTOM,
+    },
     section: { marginTop: 14 },
     sectionTitle: {
       fontSize: fs + 1,
@@ -929,8 +990,8 @@ function CreativeCV({ state, layout }: CVProps) {
     page: {
       fontFamily: font.regular,
       fontSize: fs,
-      lineHeight: 1.45,
-      color: "#1a202c",
+      lineHeight: 1.4,
+      color: "#000000",
     },
     wrapper: { flexDirection: "row", minHeight: "100%" },
     // ── Sidebar ──
@@ -997,7 +1058,13 @@ function CreativeCV({ state, layout }: CVProps) {
       borderRadius: 2,
     },
     // ── Main Content ──
-    main: { flex: 1, padding: "30 30 30 24" },
+    main: {
+      flex: 1,
+      paddingLeft: 24,
+      paddingRight: DIN_MARGIN_RIGHT,
+      paddingTop: DIN_MARGIN_TOP,
+      paddingBottom: DIN_MARGIN_BOTTOM,
+    },
     section: { marginTop: 14 },
     sectionTitle: {
       fontSize: fs + 1,
