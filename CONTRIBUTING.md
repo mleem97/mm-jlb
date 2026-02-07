@@ -25,14 +25,17 @@ Vielen Dank für dein Interesse, zum Job Letter Builder beizutragen! 🎉
 3. Installiere Dependencies: `pnpm install`
 4. Nimm deine Änderungen vor
 5. Stelle sicher, dass alle Checks bestehen:
+
    ```bash
    pnpm type-check    # TypeScript Fehler prüfen
    pnpm lint          # ESLint prüfen
    pnpm test:unit     # Unit-Tests ausführen
    pnpm build         # Build testen
    ```
+
 6. Committe mit [Conventional Commits](https://www.conventionalcommits.org/de/):
-   ```
+
+   ```text
    feat: Neue Funktion hinzufügen
    fix: Bug in PDF-Export beheben
    docs: README aktualisieren
@@ -40,6 +43,7 @@ Vielen Dank für dein Interesse, zum Job Letter Builder beizutragen! 🎉
    test: Neue Tests hinzufügen
    chore: Dependencies aktualisieren
    ```
+
 7. Pushe deinen Branch und erstelle einen Pull Request
 
 ## Entwicklungsumgebung

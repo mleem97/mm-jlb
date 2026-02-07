@@ -1,6 +1,6 @@
 {
   "name": "job-letter-builder",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "description": "Datenschutzfreundlicher Bewerbungsgenerator – Anschreiben, Lebenslauf und Bewerbungsmappen direkt im Browser erstellen. 100% offline, keine Cloud.",
   "license": "MIT",
   "author": "Meyer Media <https://meyer-media.de>",
@@ -29,7 +29,7 @@
     "check-types": "tsc --noEmit",
     "update-deps": "npx npm-check-updates -u && pnpm i",
     "build": "next build",
-    "dev": "next dev -H 0.0.0.0",
+    "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
     "type-check": "tsc --noEmit",
