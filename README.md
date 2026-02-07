@@ -5,6 +5,7 @@
 ## ✨ Features
 
 ### 📄 Dokumenten-Generation
+
 - **Anschreiben-Editor**: Intuitive Formulare mit Live-Vorschau für verschiedene Anschreiben-Typen (Initiativbewerbung, Stellenanzeige, Praktikum, Ausbildung)
 - **Lebenslauf-Builder**: Modularer Aufbau mit Drag-&-Drop, mehrere Layout-Varianten (klassisch, modern, kreativ)
 - **Deckblatt-Generator**: Optional professionelles Deckblatt mit Foto-Upload
@@ -12,6 +13,7 @@
 - **Bewerbungs-Mappe**: Zusammenstellung von Anschreiben + Lebenslauf + Anlagen als ZIP-Download
 
 ### 💾 Speicherung & Datenschutz
+
 - **Lokale Speicherung**: Alle Daten werden im Browser (IndexedDB) gespeichert – keine Cloud, keine Server
 - **JSON-Export**: Speichere Bewerbungsprofile als JSON für Backup oder Wiederverwendung
 - **JSON-Import**: Lade vorhandene Profile wieder ein
@@ -19,12 +21,14 @@
 - **Daten-Löschung**: Ein-Klick-Löschung aller gespeicherten Daten
 
 ### 🎨 Vorlagen & Customizing
+
 - **Template-Galerie**: Vorinstallierte, professionelle Designs für verschiedene Branchen
 - **Custom Templates**: Lade eigene Word- oder PDF-Vorlagen hoch (Client-seitige PDF-Manipulation)
 - **Echtzeit-Editor**: Farben, Schriftarten und Layouts direkt anpassen
 - **Dark Mode**: Augenfreundliche Darstellung bei längerer Bearbeitung
 
 ### 🤖 KI-Integration (Optional)
+
 - **AI Writing Assistant**: Mit eigener API-Key generiert die App:
   - Passende Anschreiben-Texte basierend auf Job-Beschreibung
   - Lebenslauf-Formulierungen
@@ -34,12 +38,14 @@
 - **Hinweis**: API-Key bleibt lokal im Browser, KI-Anfragen werden direkt vom Client aus geführt
 
 ### 📥 Import & Datenübernahme
+
 - **LinkedIn-Import**: Import von Profildaten über LinkedIn-Export (CSV/JSON)
 - **XING-Import**: Import von XING-Profildaten
 - **PDF-Parser**: Extrahiere Daten aus vorhandenen PDF-Lebensläufen (Client-seitige OCR)
 - **JSON-Profile**: Wiederverwendbare Profile für verschiedene Bewerbungen
 
 ### 📧 Versand & Export
+
 - **PDF-Export**: Hochwertige, druckoptimierte PDFs (Einzelseiten oder Mappe)
 - **ZIP-Export**: Komplette Bewerbung mit Anschreiben, Lebenslauf und Anlagen als ZIP
 - **E-Mail-Versand**: Direkter Versand über eigenen IMAP/SMTP-Server (kein externer Mail-Service)
@@ -49,6 +55,7 @@
 - **Teilen**: Generiere temporäre Links (via Data-URL) für direkte Vorschau
 
 ### 🛠️ Bewerbungs-Management
+
 - **Bewerbungs-Tracker**: Verwalte alle versendeten Bewerbungen mit Status (gesendet, in Prüfung, Absage, Einladung)
 - **Unternehmens-Datenbank**: Speichere Firmen-Informationen für spätere Nachfass-E-Mails
 - **Fristen-Übersicht**: Kalenderansicht mit Deadlines für Bewerbungseingänge
@@ -57,7 +64,7 @@
 ## 🛠️ Tech Stack
 
 | Bereich | Technologie |
-|---------|-------------|
+| --- | --- |
 | Framework | **Next.js 16.1.6** (App Router, Server Components) |
 | Sprache | **TypeScript** (strict mode) |
 | Styling | **Tailwind CSS 4.2** |
@@ -111,7 +118,7 @@ OPENAI_API_KEY=sk-...
 ### Verfügbare Scripts
 
 | Befehl | npm | pnpm | yarn | bun |
-|--------|-----|------|------|-----|
+| --- | --- | --- | --- | --- |
 | Dev-Server | `npm run dev` | `pnpm dev` | `yarn dev` | `bun dev` |
 | Build | `npm run build` | `pnpm build` | `yarn build` | `bun run build` |
 | Start (Prod) | `npm start` | `pnpm start` | `yarn start` | `bun start` |
@@ -120,19 +127,19 @@ OPENAI_API_KEY=sk-...
 
 ## 📂 Projektstruktur
 
-```
+```text
 /app
-  /(editor)           # Bewerbungs-Editor Routes
-  /api                # API Routes (KI-Calls, PDF-Export)
-  /preview            # Live-Vorschau Komponenten
+ /(editor)           # Bewerbungs-Editor Routes
+ /api                # API Routes (KI-Calls, PDF-Export)
+ /preview            # Live-Vorschau Komponenten
 /components
-  /forms              # Formular-Komponenten
-  /templates          # Anschreiben-/Lebenslauf-Vorlagen
-  /pdf                # PDF-Renderer Komponenten
+ /forms              # Formular-Komponenten
+ /templates          # Anschreiben-/Lebenslauf-Vorlagen
+ /pdf                # PDF-Renderer Komponenten
 /lib
-  /db                 # IndexedDB Wrapper (Dexie)
-  /validators         # Zod Schemas
-  /templates          # Template-Logik
+ /db                 # IndexedDB Wrapper (Dexie)
+ /validators         # Zod Schemas
+ /templates          # Template-Logik
 /hooks               # Custom React Hooks
 /types               # TypeScript Interfaces
 ```
@@ -148,31 +155,36 @@ OPENAI_API_KEY=sk-...
 ## 📋 Roadmap
 
 ### Phase 1 – Core (MVP)
-- [ ] Anschreiben-Editor mit Live-Vorschau
-- [ ] Lebenslauf-Builder mit Basis-Templates
-- [ ] PDF-Export (Einzeldateien)
-- [ ] Lokale IndexedDB-Speicherung
-- [ ] JSON Export/Import
+
+- [x] Anschreiben-Editor mit Live-Vorschau
+- [x] Lebenslauf-Builder mit Basis-Templates
+- [x] PDF-Export (Einzeldateien)
+- [x] Lokale IndexedDB-Speicherung
+- [x] JSON Export/Import
 
 ### Phase 2 – Advanced Features
+
 - [ ] Eigene Vorlagen hochladen (PDF-Manipulation)
 - [ ] ZIP-Export kompletter Bewerbungsmappen
 - [ ] Bewerbungs-Tracker mit Status-Verwaltung
 - [ ] Templates für verschiedene Branchen
 
 ### Phase 3 – KI & Integrationen
+
 - [ ] AI Writing Assistant (mit eigener API-Key)
 - [ ] LinkedIn/XING-Profil-Import
 - [ ] ATS-Optimierung (Keyword-Analyse)
 - [ ] PDF-Parser für bestehende Lebensläufe
 
 ### Phase 4 – Versand & Workflow
+
 - [ ] E-Mail-Versand über eigenen IMAP/SMTP
 - [ ] Kalender-Integration für Fristen
 - [ ] Follow-Up-Reminder
 - [ ] PWA-Features (Offline-Nutzung)
 
 ### Phase 5 – Collaboration
+
 - [ ] Cloud-Sync (optional, verschlüsselt)
 - [ ] Teilen von Templates mit Community
 - [ ] Multi-Language Support (DE, EN, FR)
@@ -193,7 +205,7 @@ MIT License – Nutzung, Modifikation und Weiterverbreitung erlaubt.
 ## 👤 Autor
 
 Entwickelt mit ❤️ in Hannover  
-[Meyer Media](https://meyermedia.eu) – Digitale Lösungen für Kreative
+[Meyer Media](https://meyer-media.de) – Digitale Lösungen für Kreative
 
 ---
 
