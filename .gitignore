@@ -13,9 +13,17 @@
 # testing
 /coverage
 
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
 # next.js
 /.next/
 /out/
+
+# serwist (generated service worker)
+public/sw.js
 
 # production
 /build

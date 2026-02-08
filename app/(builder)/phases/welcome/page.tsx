@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useApplicationStore } from "@/store/applicationStore";
 import { applicationImportSchema } from "@/lib/schemas/importSchema";
+import { SavedStateDialog } from "@/components/features/SavedStateDialog";
 import { importFromZip } from "@/lib/importers/zipImporter";
 import type { ApplicationImportData } from "@/types/import";
 
@@ -377,6 +378,15 @@ export default function Phase01Page() {
 
   return (
     <AnimatePresence mode="wait">
+    <SavedStateDialog
+      onContinue={() => router.push("/phases/persoenliche-daten")}
+      onNewStart={() => {
+        resetApplication();
+        localStorage.setItem("jlb:builder:mode", "new");
+        localStorage.removeItem("jlb:builder:payload");
+        router.push("/phases/persoenliche-daten");
+      }}
+    />
     <motion.main
       key="welcome-page"
       initial={{ opacity: 0 }}

@@ -13,4 +13,8 @@ export const colorPalettes: ColorPalette[] = [
   { name: "Aubergine", primary: "#581c87", secondary: "#f3e8ff" },
   { name: "Waldgrün", primary: "#166534", secondary: "#dcfce7" },
   { name: "Mitternacht", primary: "#1e1b4b", secondary: "#e0e7ff" },
+  { name: "Roségold", primary: "#b76e79", secondary: "#f5e6e8" },
+  { name: "Slate", primary: "#334155", secondary: "#e2e8f0" },
+  { name: "Koralle", primary: "#e07a5f", secondary: "#f2cc8f" },
+  { name: "Indigo", primary: "#312e81", secondary: "#c7d2fe" },
 ];

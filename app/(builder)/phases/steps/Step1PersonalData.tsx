@@ -8,6 +8,7 @@ import { z } from "zod";
 import { ChevronRight, CheckCircle2, Info, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTranslations } from "@/i18n/client";
 import { useApplicationStore } from "@/store/applicationStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { Card } from "@/components/ui/card";
 import { OnlineStatus } from "@/components/ui/online-status";
 import { formatRelativeTime } from "@/lib/utils/relativeTime";
 import { compressImage } from "@/lib/utils/imageCompression";
+import { PhotoCropDialog } from "@/components/features/PhotoCropDialog";
 
 const optionalUrl = z.string().url("Bitte eine gültige URL angeben").optional().or(z.literal(""));
 
@@ -108,12 +110,16 @@ const fieldHelpTips: Record<string, { title: string; tip: string }> = {
 // ─── Required fields list for progress tracking ─────────────
 const REQUIRED_FIELD_NAMES = ["firstName", "lastName", "email", "phone", "street", "zip", "city", "country"] as const;
 export default function Step1PersonalData() {
+  const t = useTranslations("step1");
+  const tc = useTranslations("common");
   const router = useRouter();
   const { personalData, setPersonalData, nextStep, lastSaved } = useApplicationStore();
   const [showOptional, setShowOptional] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(personalData.photo ?? "");
   const [activeField, setActiveField] = useState<string>("default");
   const [lastSavedText, setLastSavedText] = useState("");
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [rawPhotoSrc, setRawPhotoSrc] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
 
   const defaultValues = useMemo(
@@ -210,26 +216,48 @@ export default function Step1PersonalData() {
   const handlePhotoUpload = async (file?: File | null) => {
     if (!file) return;
     try {
+      // Read as data URL for the crop dialog
+      const reader = new FileReader();
+      reader.onload = () => {
+        setRawPhotoSrc(reader.result as string);
+        setCropDialogOpen(true);
+      };
+      reader.onerror = () => {
+        toast.error(tc("error"));
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      toast.error(tc("error"));
+    }
+  };
+
+  const handleCropComplete = async (croppedImage: string) => {
+    setCropDialogOpen(false);
+    try {
+      // Convert base64 to File for compression
+      const response = await fetch(croppedImage);
+      const blob = await response.blob();
+      const file = new File([blob], "cropped-photo.jpg", { type: "image/jpeg" });
       const compressed = await compressImage(file);
       setPhotoPreview(compressed);
       setPersonalData({ photo: compressed });
-      toast.success("Foto hochgeladen und komprimiert");
+      toast.success(tc("success"));
     } catch {
-      toast.error("Foto konnte nicht verarbeitet werden");
+      toast.error(tc("error"));
     }
   };
 
   const handlePhotoDelete = () => {
     setPhotoPreview("");
     setPersonalData({ photo: undefined });
-    toast.info("Foto entfernt");
+    toast.info(t("photoRemove"));
   };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Schritt 1 von 9: Persönliche Daten</span>
+          <span className="text-sm font-medium">Schritt 1 von 9: {t("title")}</span>
           <span className="text-sm text-muted-foreground">11%</span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -279,10 +307,10 @@ export default function Step1PersonalData() {
           <div className="border-t pt-3 flex items-center justify-between gap-2">
             {lastSaved ? (
               <p className="text-xs text-muted-foreground">
-                Zuletzt gespeichert: {lastSavedText}
+                {tc("saved")}: {lastSavedText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Noch nicht gespeichert</p>
+              <p className="text-xs text-muted-foreground">{tc("save")}</p>
             )}
             <OnlineStatus />
           </div>
@@ -292,7 +320,7 @@ export default function Step1PersonalData() {
           <form onSubmit={handleSubmit(onSubmit)} ref={formRef} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">Vorname *</Label>
+                <Label htmlFor="firstName">{t("firstName")} *</Label>
                 <Input
                   id="firstName"
                   autoFocus
@@ -308,7 +336,7 @@ export default function Step1PersonalData() {
               </div>
 
               <div>
-                <Label htmlFor="lastName">Nachname *</Label>
+                <Label htmlFor="lastName">{t("lastName")} *</Label>
                 <Input
                   id="lastName"
                   {...register("lastName")}
@@ -325,7 +353,7 @@ export default function Step1PersonalData() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="email">E-Mail-Adresse *</Label>
+                <Label htmlFor="email">{t("email")} *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -344,7 +372,7 @@ export default function Step1PersonalData() {
               </div>
 
               <div>
-                <Label htmlFor="phone">Telefonnummer *</Label>
+                <Label htmlFor="phone">{t("phone")} *</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -361,7 +389,7 @@ export default function Step1PersonalData() {
             </div>
 
             <div>
-              <Label htmlFor="street">Straße & Hausnummer *</Label>
+              <Label htmlFor="street">{t("street")} *</Label>
               <Input
                 id="street"
                 {...register("street")}
@@ -377,7 +405,7 @@ export default function Step1PersonalData() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="zip">Postleitzahl *</Label>
+                <Label htmlFor="zip">{t("zip")} *</Label>
                 <Input
                   id="zip"
                   {...register("zip")}
@@ -393,7 +421,7 @@ export default function Step1PersonalData() {
               </div>
 
               <div>
-                <Label htmlFor="city">Stadt *</Label>
+                <Label htmlFor="city">{t("city")} *</Label>
                 <Input
                   id="city"
                   {...register("city")}
@@ -409,7 +437,7 @@ export default function Step1PersonalData() {
             </div>
 
             <div>
-              <Label htmlFor="country">Land *</Label>
+              <Label htmlFor="country">{t("country")} *</Label>
               <select
                 id="country"
                 {...register("country")}
@@ -440,7 +468,7 @@ export default function Step1PersonalData() {
                 <div className="mt-4 space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="birthDate">Geburtsdatum</Label>
+                      <Label htmlFor="birthDate">{t("birthDate")}</Label>
                       <Input
                         id="birthDate"
                         type="date"
@@ -454,7 +482,7 @@ export default function Step1PersonalData() {
                     </div>
 
                     <div>
-                      <Label htmlFor="birthPlace">Geburtsort</Label>
+                      <Label htmlFor="birthPlace">{t("birthPlace")}</Label>
                       <Input
                         id="birthPlace"
                         {...register("birthPlace")}
@@ -467,7 +495,7 @@ export default function Step1PersonalData() {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="nationality">Staatsangehörigkeit</Label>
+                      <Label htmlFor="nationality">{t("nationality")}</Label>
                       <Input
                         id="nationality"
                         {...register("nationality")}
@@ -505,7 +533,7 @@ export default function Step1PersonalData() {
                   </div>
 
                   <div>
-                    <Label htmlFor="photo">Bewerbungsfoto (optional)</Label>
+                    <Label htmlFor="photo">{t("photo")} ({tc("optional")})</Label>
                     <Input
                       id="photo"
                       type="file"
@@ -529,7 +557,7 @@ export default function Step1PersonalData() {
                           className="gap-1.5"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                          Foto entfernen
+                          {t("photoRemove")}
                         </Button>
                       </div>
                     ) : null}
@@ -537,16 +565,22 @@ export default function Step1PersonalData() {
                       Optional für Deckblatt oder Profil. Max 500 KB, wird automatisch komprimiert.
                     </p>
                   </div>
+                  <PhotoCropDialog
+                    imageSrc={rawPhotoSrc}
+                    open={cropDialogOpen}
+                    onClose={() => setCropDialogOpen(false)}
+                    onComplete={handleCropComplete}
+                  />
                 </div>
               ) : null}
             </div>
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-6 border-t">
               <Button type="button" variant="outline" onClick={() => router.push("/intro")}>
-                Zurück
+                {tc("back")}
               </Button>
               <Button type="submit" size="lg" disabled={!isValid} className="gap-2">
-                Weiter
+                {tc("next")}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>

@@ -34,6 +34,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { useTranslations } from "@/i18n/client";
 import { useApplicationStore } from "@/store/applicationStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -255,6 +256,8 @@ function EducationForm({
   onSave: (data: EducationFormData, id?: string) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("step3");
+  const tc = useTranslations("common");
   const defaultValues: EducationFormData = education
     ? {
         type: education.type,
@@ -332,14 +335,14 @@ function EducationForm({
     >
       <Card className="p-8">
         <h3 className="text-lg font-semibold mb-6">
-          {isEditing ? "Abschluss bearbeiten" : "Neuen Abschluss hinzufügen"}
+          {isEditing ? tc("edit") : t("addEntry")}
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Type & Institution */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="type">Abschlusstyp *</Label>
+              <Label htmlFor="type">{t("type")} *</Label>
               <select
                 id="type"
                 className={`${selectClassName} ${errors.type ? "border-destructive" : ""}`}
@@ -356,7 +359,7 @@ function EducationForm({
               )}
             </div>
             <div>
-              <Label htmlFor="institution">Institution / Hochschule / Schule *</Label>
+              <Label htmlFor="institution">{t("institution")} *</Label>
               <Input
                 id="institution"
                 {...register("institution")}
@@ -373,7 +376,7 @@ function EducationForm({
           {/* Degree & Field of Study */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="degree">Abschlussbezeichnung</Label>
+              <Label htmlFor="degree">{t("degree")}</Label>
               <Input
                 id="degree"
                 {...register("degree")}
@@ -381,7 +384,7 @@ function EducationForm({
               />
             </div>
             <div>
-              <Label htmlFor="fieldOfStudy">Studiengang / Fachrichtung</Label>
+              <Label htmlFor="fieldOfStudy">{t("fieldOfStudy")}</Label>
               <Input
                 id="fieldOfStudy"
                 {...register("fieldOfStudy")}
@@ -467,7 +470,7 @@ function EducationForm({
 
           {/* Grade */}
           <div className="max-w-xs">
-            <Label htmlFor="grade">Note</Label>
+            <Label htmlFor="grade">{t("grade")}</Label>
             <Input
               id="grade"
               {...register("grade")}
@@ -477,7 +480,7 @@ function EducationForm({
 
           {/* Description */}
           <div>
-            <Label htmlFor="description">Schwerpunkte / Thesis-Titel</Label>
+            <Label htmlFor="description">{t("description_field")}</Label>
             <Textarea
               id="description"
               {...register("description")}
@@ -489,11 +492,11 @@ function EducationForm({
           {/* Form Actions */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onCancel}>
-              Abbrechen
+              {tc("cancel")}
             </Button>
             <Button type="submit" className="gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Abschluss speichern
+              {tc("save")}
             </Button>
           </div>
         </form>
@@ -504,6 +507,8 @@ function EducationForm({
 
 // ─── Main Component ───────────────────────────────────────
 export default function Step3Education() {
+  const t = useTranslations("step3");
+  const tc = useTranslations("common");
   const router = useRouter();
   const {
     education,
@@ -572,7 +577,7 @@ export default function Step3Education() {
         const newIndex = education.findIndex((e) => e.id === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
           reorderEducation(oldIndex, newIndex);
-          toast.success("Reihenfolge aktualisiert");
+          toast.success(tc("success"));
         }
       }
     },
@@ -584,7 +589,7 @@ export default function Step3Education() {
     (id: string) => {
       removeEducation(id);
       setDeleteId(null);
-      toast.success("Abschluss entfernt");
+      toast.success(tc("success"));
     },
     [removeEducation],
   );
@@ -603,7 +608,7 @@ export default function Step3Education() {
           grade: data.grade || undefined,
           description: data.description || undefined,
         });
-        toast.success("Abschluss aktualisiert");
+        toast.success(tc("success"));
       } else {
         const newEntry: Education = {
           id: crypto.randomUUID(),
@@ -617,7 +622,7 @@ export default function Step3Education() {
           description: data.description || undefined,
         };
         addEducation(newEntry);
-        toast.success("Abschluss hinzugefügt");
+        toast.success(tc("success"));
       }
       setEditingId(null);
     },
@@ -645,7 +650,7 @@ export default function Step3Education() {
       {/* ─── Progress Bar ─────────────────────────────── */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Schritt 3 von 9: Bildungsweg</span>
+          <span className="text-sm font-medium">Schritt 3 von 9: {t("title")}</span>
           <span className="text-sm text-muted-foreground">33%</span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -688,10 +693,10 @@ export default function Step3Education() {
           <div className="border-t pt-3 flex items-center justify-between gap-2">
             {lastSaved ? (
               <p className="text-xs text-muted-foreground">
-                Zuletzt gespeichert: {lastSavedText}
+                {tc("saved")}: {lastSavedText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Noch nicht gespeichert</p>
+              <p className="text-xs text-muted-foreground">{tc("save")}</p>
             )}
             <OnlineStatus />
           </div>
@@ -712,14 +717,14 @@ export default function Step3Education() {
                 <Card className="p-12 text-center">
                   <GraduationCap className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">
-                    Noch keine Ausbildung erfasst
+                    {t("noEntries")}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
                     Fügen Sie Ihre Abschlüsse und Ausbildungen hinzu, um Ihren Lebenslauf zu vervollständigen.
                   </p>
                   <Button onClick={() => setEditingId("new")} className="gap-2">
                     <Plus className="w-4 h-4" />
-                    Ersten Abschluss hinzufügen
+                    {t("addEntry")}
                   </Button>
                 </Card>
               ) : (
@@ -756,7 +761,7 @@ export default function Step3Education() {
                   className="gap-2 w-full"
                 >
                   <Plus className="w-4 h-4" />
-                  Weiteren Abschluss hinzufügen
+                  {t("addEntry")}
                 </Button>
               )}
             </>
@@ -772,7 +777,7 @@ export default function Step3Education() {
                 className="gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Zurück
+                {tc("back")}
               </Button>
               <Button
                 type="button"
@@ -780,7 +785,7 @@ export default function Step3Education() {
                 onClick={() => router.push("/phases/skills")}
                 className="gap-2"
               >
-                Weiter
+                {tc("next")}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -797,20 +802,20 @@ export default function Step3Education() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Abschluss löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
               Diese Aktion kann nicht rückgängig gemacht werden. Der Abschluss wird unwiderruflich entfernt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteId) handleDelete(deleteId);
               }}
             >
-              Löschen
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

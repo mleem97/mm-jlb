@@ -10,7 +10,7 @@ export const documentSelectionSchema = z.object({
 export type DocumentSelectionFormData = z.infer<typeof documentSelectionSchema>;
 
 // ─── Layout Config Schema ──────────────────────────────────
-export const templateIdSchema = z.enum(["classic", "modern", "creative"]);
+export const templateIdSchema = z.enum(["classic", "modern", "creative", "tech", "executive", "academic"]);
 
 export const fontFamilySchema = z.enum([
   "Inter",

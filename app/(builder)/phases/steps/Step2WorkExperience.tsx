@@ -35,6 +35,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { useTranslations } from "@/i18n/client";
 import { useApplicationStore } from "@/store/applicationStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -330,6 +331,8 @@ const selectClassName =
 
 // ─── Main Component ───────────────────────────────────────
 export default function Step2WorkExperience() {
+  const t = useTranslations("step2");
+  const tc = useTranslations("common");
   const router = useRouter();
   const {
     workExperience,
@@ -390,7 +393,7 @@ export default function Step2WorkExperience() {
   const handleExplainGap = useCallback(
     (gapKey: string, type: GapInfo["explanationType"], text?: string) => {
       setGapExplanations((prev) => ({ ...prev, [gapKey]: { type, text } }));
-      toast.success("Lücke erklärt");
+      toast.success(tc("success"));
     },
     []
   );
@@ -404,7 +407,7 @@ export default function Step2WorkExperience() {
         const newIndex = workExperience.findIndex((p) => p.id === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
           reorderWorkExperience(oldIndex, newIndex);
-          toast.success("Reihenfolge aktualisiert");
+          toast.success(tc("success"));
         }
       }
     },
@@ -416,7 +419,7 @@ export default function Step2WorkExperience() {
     (id: string) => {
       removeWorkExperience(id);
       setDeleteId(null);
-      toast.success("Position entfernt");
+      toast.success(tc("success"));
     },
     [removeWorkExperience]
   );
@@ -445,7 +448,7 @@ export default function Step2WorkExperience() {
           achievements,
           description: data.description || undefined,
         });
-        toast.success("Position aktualisiert");
+        toast.success(tc("success"));
       } else {
         const newEntry: WorkExperience = {
           id: crypto.randomUUID(),
@@ -460,7 +463,7 @@ export default function Step2WorkExperience() {
           description: data.description || undefined,
         };
         addWorkExperience(newEntry);
-        toast.success("Position hinzugefügt");
+        toast.success(tc("success"));
       }
       setEditingId(null);
     },
@@ -497,7 +500,7 @@ export default function Step2WorkExperience() {
       {/* ─── Progress Bar ─────────────────────────────── */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Schritt 2 von 9: Berufserfahrung</span>
+          <span className="text-sm font-medium">Schritt 2 von 9: {t("title")}</span>
           <span className="text-sm text-muted-foreground">22%</span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -545,10 +548,10 @@ export default function Step2WorkExperience() {
           <div className="border-t pt-3 flex items-center justify-between gap-2">
             {lastSaved ? (
               <p className="text-xs text-muted-foreground">
-                Zuletzt gespeichert: {lastSavedText}
+                {tc("saved")}: {lastSavedText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Noch nicht gespeichert</p>
+              <p className="text-xs text-muted-foreground">{tc("save")}</p>
             )}
             <OnlineStatus />
           </div>
@@ -571,14 +574,14 @@ export default function Step2WorkExperience() {
                 <Card className="p-12 text-center">
                   <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">
-                    Noch keine Berufserfahrung erfasst
+                    {t("noEntries")}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
                     Fügen Sie Ihre bisherigen Positionen hinzu, um Ihren Lebenslauf zu vervollständigen.
                   </p>
                   <Button onClick={() => setEditingId("new")} className="gap-2">
                     <Plus className="w-4 h-4" />
-                    Erste Position hinzufügen
+                    {t("addEntry")}
                   </Button>
                 </Card>
               ) : (
@@ -625,7 +628,7 @@ export default function Step2WorkExperience() {
                   className="gap-2 w-full"
                 >
                   <Plus className="w-4 h-4" />
-                  Weitere Position hinzufügen
+                  {t("addEntry")}
                 </Button>
               )}
             </>
@@ -641,7 +644,7 @@ export default function Step2WorkExperience() {
                 className="gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Zurück
+                {tc("back")}
               </Button>
               <Button
                 type="button"
@@ -649,7 +652,7 @@ export default function Step2WorkExperience() {
                 onClick={() => router.push("/phases/ausbildung")}
                 className="gap-2"
               >
-                Weiter
+                {tc("next")}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -666,20 +669,20 @@ export default function Step2WorkExperience() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Position löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
               Diese Aktion kann nicht rückgängig gemacht werden. Die Position wird unwiderruflich entfernt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteId) handleDelete(deleteId);
               }}
             >
-              Löschen
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -700,6 +703,8 @@ function WorkExperienceForm({
   onSave: (data: WorkExperienceFormData, id?: string) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("step2");
+  const tc = useTranslations("common");
   const defaultValues: WorkExperienceFormData = position
     ? {
         company: position.company,
@@ -781,14 +786,14 @@ function WorkExperienceForm({
     >
       <Card className="p-8">
         <h3 className="text-lg font-semibold mb-6">
-          {isEditing ? "Position bearbeiten" : "Neue Position hinzufügen"}
+          {isEditing ? tc("edit") : t("addEntry")}
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Company & Job Title */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="company">Firma *</Label>
+              <Label htmlFor="company">{t("employer")} *</Label>
               <Input
                 id="company"
                 {...register("company")}
@@ -801,7 +806,7 @@ function WorkExperienceForm({
               )}
             </div>
             <div>
-              <Label htmlFor="jobTitle">Jobtitel *</Label>
+              <Label htmlFor="jobTitle">{t("position")} *</Label>
               <Input
                 id="jobTitle"
                 {...register("jobTitle")}
@@ -816,7 +821,7 @@ function WorkExperienceForm({
 
           {/* Location */}
           <div>
-            <Label htmlFor="location">Standort / Stadt</Label>
+            <Label htmlFor="location">{t("location")}</Label>
             <Input
               id="location"
               {...register("location")}
@@ -912,7 +917,7 @@ function WorkExperienceForm({
                   }}
                 />
                 <Label htmlFor="isCurrentJob" className="text-sm font-normal cursor-pointer">
-                  Bis heute (aktuelle Position)
+                  {t("current")}
                 </Label>
               </div>
             </div>
@@ -920,7 +925,7 @@ function WorkExperienceForm({
 
           {/* Tasks */}
           <div>
-            <Label htmlFor="tasks">Aufgaben (eine pro Zeile)</Label>
+            <Label htmlFor="tasks">{t("tasks")}</Label>
             <Textarea
               id="tasks"
               {...register("tasks")}
@@ -960,11 +965,11 @@ function WorkExperienceForm({
           {/* Form Actions */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onCancel}>
-              Abbrechen
+              {tc("cancel")}
             </Button>
             <Button type="submit" className="gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Position speichern
+              {tc("save")}
             </Button>
           </div>
         </form>

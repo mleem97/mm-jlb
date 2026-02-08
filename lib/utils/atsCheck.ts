@@ -185,16 +185,85 @@ function checkKeywordDensity(state: ApplicationState): ATSCheck {
   };
 }
 
+function checkJobDescriptionPresent(state: ApplicationState): ATSCheck {
+  const hasJobDescription = Boolean(
+    state.jobPosting?.jobDescriptionText &&
+      state.jobPosting.jobDescriptionText.trim().length > 50,
+  );
+  return {
+    name: "Stellenbeschreibung",
+    passed: hasJobDescription,
+    message: hasJobDescription
+      ? "Stellenbeschreibung vorhanden – ermöglicht Keyword-Matching"
+      : "Keine Stellenbeschreibung hinterlegt – Keyword-Optimierung nicht möglich",
+    severity: "info",
+  };
+}
+
+function checkCoverLetterLength(state: ApplicationState): ATSCheck {
+  const coverText = [
+    state.coverLetter?.introduction ?? "",
+    state.coverLetter?.mainBody ?? "",
+    state.coverLetter?.closing ?? "",
+    state.coverLetter?.fullText ?? "",
+  ].join(" ");
+
+  const wordCount = coverText
+    .split(/\s+/)
+    .filter((w) => w.length > 0).length;
+  const passed = wordCount >= 150;
+
+  return {
+    name: "Anschreiben-Länge",
+    passed,
+    message: passed
+      ? `Anschreiben hat ${wordCount} Wörter – gute Länge`
+      : `Anschreiben hat nur ${wordCount} Wörter (mindestens 150 empfohlen)`,
+    severity: passed ? "info" : "warning",
+  };
+}
+
+function checkEducationPresent(state: ApplicationState): ATSCheck {
+  const passed = state.education.length > 0;
+  return {
+    name: "Bildungsweg",
+    passed,
+    message: passed
+      ? `${state.education.length} Bildungseinträge vorhanden`
+      : "Kein Bildungsweg angegeben – viele ATS-Systeme erwarten diesen Abschnitt",
+    severity: "warning",
+  };
+}
+
+function checkContactCompleteness(state: ApplicationState): ATSCheck {
+  const hasStreet = Boolean(state.personalData.address?.street);
+  const hasCity = Boolean(state.personalData.address?.city);
+  const hasZip = Boolean(state.personalData.address?.zip);
+  const passed = hasStreet && hasCity && hasZip;
+  return {
+    name: "Vollständige Adresse",
+    passed,
+    message: passed
+      ? "Vollständige Postadresse vorhanden"
+      : `Adresse unvollständig: ${[!hasStreet && "Straße", !hasCity && "Stadt", !hasZip && "PLZ"].filter(Boolean).join(", ")} fehlt`,
+    severity: "warning",
+  };
+}
+
 export function runATSCheck(state: ApplicationState): ATSCheckResult {
   const checks: ATSCheck[] = [
     checkStandardFont(state),
     checkFontSize(state),
     checkSpecialCharacters(state),
     checkContactInfo(state),
+    checkContactCompleteness(state),
     checkSkillsPresent(state),
     checkWorkExperience(state),
+    checkEducationPresent(state),
     checkPhotoPosition(state),
     checkKeywordDensity(state),
+    checkJobDescriptionPresent(state),
+    checkCoverLetterLength(state),
   ];
 
   const passedCount = checks.filter((c) => c.passed).length;
