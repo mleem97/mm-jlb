@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { useApplicationStore } from "@/store/applicationStore";
+import { useTranslations } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ function generateConfetti(count: number): ConfettiPieceWithDelay[] {
 const FEEDBACK_KEY = "jlb-builder-feedback";
 
 function FeedbackStars() {
+  const t = useTranslations("step10");
   const [rating, setRating] = useState(() => {
     if (typeof window === "undefined") return 0;
     const stored = localStorage.getItem(FEEDBACK_KEY);
@@ -79,7 +81,7 @@ function FeedbackStars() {
   if (submitted) {
     return (
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
-        <span>Danke!</span>
+        <span>{t("feedbackThanksShort")}</span>
         {Array.from({ length: 5 }, (_, i) => (
           <Star
             key={i}
@@ -93,7 +95,7 @@ function FeedbackStars() {
   return (
     <div className="flex flex-col items-center gap-2">
       <span className="text-sm text-muted-foreground">
-        War dieser Builder hilfreich?
+        {t("feedbackQuestion")}
       </span>
       <div className="flex gap-1">
         {Array.from({ length: 5 }, (_, i) => {
@@ -125,6 +127,8 @@ function FeedbackStars() {
 // ─── Main Component ─────────────────────────────────────
 export default function Step10Complete() {
   const router = useRouter();
+  const t = useTranslations("step10");
+  const tc = useTranslations("common");
   const personalData = useApplicationStore((s) => s.personalData);
   const jobPosting = useApplicationStore((s) => s.jobPosting);
   const coverLetter = useApplicationStore((s) => s.coverLetter);
@@ -138,23 +142,23 @@ export default function Step10Complete() {
 
   const fullName = useMemo(() => {
     const parts = [personalData.firstName, personalData.lastName].filter(Boolean);
-    return parts.length > 0 ? parts.join(" ") : "Nicht angegeben";
+    return parts.length > 0 ? parts.join(" ") : t("notSpecified");
   }, [personalData.firstName, personalData.lastName]);
 
   const documentsCreated = useMemo(() => {
     const docs: string[] = [];
-    if (documentSelection.includeCV) docs.push("Lebenslauf");
-    if (documentSelection.includeCoverLetter && coverLetter) docs.push("Anschreiben");
-    if (documentSelection.includeCoverPage) docs.push("Deckblatt");
+    if (documentSelection.includeCV) docs.push(t("cvLabel"));
+    if (documentSelection.includeCoverLetter && coverLetter) docs.push(t("coverLetterLabel"));
+    if (documentSelection.includeCoverPage) docs.push(t("coverPageLabel"));
     if (attachments.length > 0)
-      docs.push(`${attachments.length} Anhang${attachments.length > 1 ? "e" : ""}`);
+      docs.push(attachments.length > 1 ? t("attachmentsCount", { count: attachments.length }) : t("attachmentCount", { count: attachments.length }));
     return docs;
   }, [documentSelection, coverLetter, attachments]);
 
   const formatLabel = useMemo(() => {
     const labels: Record<string, string> = {
       pdf: "PDF",
-      zip: "ZIP-Archiv",
+      zip: t("zipArchive"),
       json: "JSON",
     };
     return labels[exportConfig.format] ?? exportConfig.format.toUpperCase();
@@ -233,7 +237,7 @@ export default function Step10Complete() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
         >
-          🎉 Bewerbung erfolgreich erstellt!
+          {t("successHeading")}
         </motion.h1>
         <motion.p
           className="mt-2 text-muted-foreground text-center max-w-md"
@@ -241,7 +245,7 @@ export default function Step10Complete() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          Alle Dokumente wurden generiert und stehen zum Export bereit.
+          {t("successSubtext")}
         </motion.p>
       </div>
 
@@ -252,13 +256,13 @@ export default function Step10Complete() {
         transition={{ delay: 1.0, duration: 0.5 }}
       >
         <Card className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Zusammenfassung</h2>
+          <h2 className="text-lg font-semibold">{t("summary")}</h2>
 
           <div className="grid gap-3 text-sm">
             <div className="flex items-start gap-3">
               <FileText className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <div>
-                <span className="text-muted-foreground">Name:</span>{" "}
+                <span className="text-muted-foreground">{t("nameLabel")}</span>{" "}
                 <span className="font-medium">{fullName}</span>
               </div>
             </div>
@@ -266,9 +270,9 @@ export default function Step10Complete() {
             <div className="flex items-start gap-3">
               <Briefcase className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <div>
-                <span className="text-muted-foreground">Unternehmen:</span>{" "}
+                <span className="text-muted-foreground">{t("companyLabel")}</span>{" "}
                 <span className="font-medium">
-                  {jobPosting?.companyName || "Nicht angegeben"}
+                  {jobPosting?.companyName || t("notSpecified")}
                 </span>
               </div>
             </div>
@@ -276,9 +280,9 @@ export default function Step10Complete() {
             <div className="flex items-start gap-3">
               <Briefcase className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <div>
-                <span className="text-muted-foreground">Stellentitel:</span>{" "}
+                <span className="text-muted-foreground">{t("jobTitleLabel")}</span>{" "}
                 <span className="font-medium">
-                  {jobPosting?.jobTitle || "Nicht angegeben"}
+                  {jobPosting?.jobTitle || t("notSpecified")}
                 </span>
               </div>
             </div>
@@ -286,11 +290,11 @@ export default function Step10Complete() {
             <div className="flex items-start gap-3">
               <Paperclip className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <div>
-                <span className="text-muted-foreground">Dokumente:</span>{" "}
+                <span className="text-muted-foreground">{t("documentsLabel")}</span>{" "}
                 <span className="font-medium">
                   {documentsCreated.length > 0
                     ? documentsCreated.join(", ")
-                    : "Keine Dokumente ausgewählt"}
+                    : t("noDocsSelected")}
                 </span>
               </div>
             </div>
@@ -298,7 +302,7 @@ export default function Step10Complete() {
             <div className="flex items-start gap-3">
               <Download className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <div>
-                <span className="text-muted-foreground">Exportformat:</span>{" "}
+                <span className="text-muted-foreground">{t("exportFormatLabel")}</span>{" "}
                 <Badge variant="secondary" className="ml-1">
                   {formatLabel}
                 </Badge>
@@ -307,18 +311,17 @@ export default function Step10Complete() {
           </div>
 
           <div className="pt-3 border-t text-xs text-muted-foreground">
-            Abgeschlossen am{" "}
-            {completionDate.toLocaleDateString("de-DE", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })}{" "}
-            um{" "}
-            {completionDate.toLocaleTimeString("de-DE", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}{" "}
-            Uhr
+            {t("completedAt", {
+              date: completionDate.toLocaleDateString(undefined, {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
+              time: completionDate.toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            })}
           </div>
         </Card>
       </motion.div>
@@ -336,22 +339,22 @@ export default function Step10Complete() {
           className="gap-2"
         >
           <RotateCcw className="h-4 w-4" />
-          Neue Bewerbung starten
+          {t("newApplication")}
         </Button>
 
         <Button onClick={handleDuplicate} variant="outline" className="gap-2">
           <Copy className="h-4 w-4" />
-          Bewerbung duplizieren
+          {t("duplicateApplication")}
         </Button>
 
         <Button onClick={handleDashboard} variant="outline" className="gap-2">
           <LayoutDashboard className="h-4 w-4" />
-          Alle Bewerbungen anzeigen
+          {t("showAllApplications")}
         </Button>
 
         <Button onClick={handleReExport} variant="outline" className="gap-2">
           <Download className="h-4 w-4" />
-          Export wiederholen
+          {t("reExport")}
         </Button>
       </motion.div>
 

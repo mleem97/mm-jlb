@@ -1,9 +1,9 @@
 {
   "name": "job-letter-builder",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Datenschutzfreundlicher Bewerbungsgenerator – Anschreiben, Lebenslauf und Bewerbungsmappen direkt im Browser erstellen. 100% offline, keine Cloud.",
   "license": "MIT",
-  "author": "Meyer Media <https://meyer-media.de>",
+  "author": "Meyer Media <https://meyermedia.eu/>",
   "repository": {
     "type": "git",
     "url": "https://github.com/mleem97/mm-jlb.git"
@@ -35,9 +35,16 @@
     "type-check": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest watch",
-    "test:unit:ui": "vitest --ui"
+    "test:unit:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.38",
+    "@ai-sdk/google": "^3.0.22",
+    "@ai-sdk/openai": "^3.0.26",
+    "@ai-sdk/react": "^3.0.79",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -47,6 +54,8 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@react-pdf/renderer": "^4.3.2",
     "@react-three/fiber": "^9.5.0",
+    "@serwist/next": "^9.5.4",
+    "ai": "^6.0.77",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dexie": "^4.3.0",
@@ -55,11 +64,16 @@
     "lucide-react": "^0.563.0",
     "motion": "^12.33.0",
     "next": "16.1.6",
+    "next-intl": "^4.8.2",
+    "nodemailer": "^8.0.1",
+    "pdf-lib": "^1.17.1",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-easy-crop": "^5.5.6",
     "react-hook-form": "^7.71.1",
     "react-icons": "^5.5.0",
+    "serwist": "^9.5.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "three": "^0.182.0",
@@ -67,10 +81,12 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^25",
+    "@types/nodemailer": "^7.0.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.182.0",

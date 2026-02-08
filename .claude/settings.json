@@ -1,0 +1,8 @@
+{
+    "claudeCode.disableLoginPrompt": false, 
+    "env": {
+        "ANTHROPIC_VERTEX_PROJECT_ID": "gen-lang-client-0914978604",
+        "CLAUDE_CODE_USE_VERTEX": "1",
+        "CLOUD_ML_REGION": "global"
+    }
+}

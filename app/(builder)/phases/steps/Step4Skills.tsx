@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 
+import { useTranslations } from "@/i18n/client";
 import { useApplicationStore } from "@/store/applicationStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -613,6 +614,8 @@ function SoftSkillsSection() {
 
 // ─── Language Section Component ───────────────────────────
 function LanguageSection() {
+  const tl = useTranslations("languages");
+  const tc = useTranslations("common");
   const { languages, addLanguage, updateLanguage, removeLanguage } =
     useApplicationStore();
 
@@ -828,7 +831,7 @@ function LanguageSection() {
               </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
-                  Abbrechen
+                  {tc("cancel")}
                 </Button>
                 <Button
                   type="button"
@@ -838,7 +841,7 @@ function LanguageSection() {
                   className="gap-1"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  {editingId ? "Aktualisieren" : "Hinzufügen"}
+                  {editingId ? tc("edit") : tc("add")}
                 </Button>
               </div>
             </Card>
@@ -854,7 +857,7 @@ function LanguageSection() {
           className="gap-2 w-full"
         >
           <Plus className="w-4 h-4" />
-          {languages.length === 0 ? "Sprache hinzufügen" : "Weitere Sprache hinzufügen"}
+          {tl("addLanguage")}
         </Button>
       )}
 
@@ -867,20 +870,20 @@ function LanguageSection() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sprache löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{tc("delete")}?</AlertDialogTitle>
             <AlertDialogDescription>
               Diese Sprache wird unwiderruflich aus Ihrem Profil entfernt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteId) handleDelete(deleteId);
               }}
             >
-              Löschen
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -891,6 +894,8 @@ function LanguageSection() {
 
 // ─── Main Component ───────────────────────────────────────
 export default function Step4Skills() {
+  const t = useTranslations("step4");
+  const tc = useTranslations("common");
   const router = useRouter();
   const { skills, languages, lastSaved } = useApplicationStore();
 
@@ -925,7 +930,7 @@ export default function Step4Skills() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">
-            Schritt 4 von 9: Skills &amp; Kompetenzen
+            Schritt 4 von 9: {t("title")}
           </span>
           <span className="text-sm text-muted-foreground">44%</span>
         </div>
@@ -972,10 +977,10 @@ export default function Step4Skills() {
           <div className="border-t pt-3 flex items-center justify-between gap-2">
             {lastSaved ? (
               <p className="text-xs text-muted-foreground">
-                Zuletzt gespeichert: {lastSavedText}
+                {tc("saved")}: {lastSavedText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Noch nicht gespeichert</p>
+              <p className="text-xs text-muted-foreground">{tc("save")}</p>
             )}
             <OnlineStatus />
           </div>
@@ -1023,7 +1028,7 @@ export default function Step4Skills() {
               className="gap-2"
             >
               <ChevronLeft className="w-4 h-4" />
-              Zurück
+              {tc("back")}
             </Button>
             <Button
               type="button"
@@ -1031,7 +1036,7 @@ export default function Step4Skills() {
               onClick={() => router.push("/phases/zertifikate")}
               className="gap-2"
             >
-              Weiter
+              {tc("next")}
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

@@ -1,4 +1,4 @@
-export type TemplateId = "classic" | "modern" | "creative";
+export type TemplateId = "classic" | "modern" | "creative" | "tech" | "executive" | "academic";
 export type FontFamily = "Inter" | "Roboto" | "Merriweather" | "Open Sans" | "Lato";
 export type PhotoPosition = "top-right" | "top-left" | "sidebar";
 export type HeaderStyle = "centered" | "left-aligned" | "minimal";

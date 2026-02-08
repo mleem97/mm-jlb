@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 
+import { useTranslations } from "@/i18n/client";
 import { useApplicationStore } from "@/store/applicationStore";
 import { applicationDb } from "@/lib/db/applicationDb";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ import {
 } from "@/lib/schemas/certificateProjectFormSchema";
 import type { Certificate } from "@/types/certificate";
 import type { Project } from "@/types/project";
+import { certificateSuggestions } from "@/lib/data/certificateSuggestions";
 
 // ─── Constants ─────────────────────────────────────────────
 const MONTHS = [
@@ -188,11 +190,15 @@ function CertificateForm({
   onSave: (data: CertificateFormData, id?: string, attachmentId?: string) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("step5");
+  const tc = useTranslations("common");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [attachmentId, setAttachmentId] = useState<string | undefined>(
     certificate?.attachmentId,
   );
   const [attachmentName, setAttachmentName] = useState<string>("");
+  const [suggestions, setSuggestions] = useState<typeof certificateSuggestions>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const defaultValues: CertificateFormData = certificate
     ? {
@@ -318,27 +324,82 @@ function CertificateForm({
     >
       <Card className="p-8">
         <h3 className="text-lg font-semibold mb-6">
-          {isEditing ? "Zertifikat bearbeiten" : "Neues Zertifikat hinzufügen"}
+          {isEditing ? tc("edit") : t("addCert")}
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Name & Organization */}
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="cert-name">Name des Zertifikats *</Label>
+            <div className="relative">
+              <Label htmlFor="cert-name">{t("certName")} *</Label>
               <Input
                 id="cert-name"
                 {...register("name")}
+                onChange={(e) => {
+                  register("name").onChange(e);
+                  const val = e.target.value;
+                  if (val.length >= 2) {
+                    const filtered = certificateSuggestions
+                      .filter((c) =>
+                        c.name.toLowerCase().includes(val.toLowerCase()),
+                      )
+                      .slice(0, 8);
+                    setSuggestions(filtered);
+                    setShowSuggestions(filtered.length > 0);
+                  } else {
+                    setShowSuggestions(false);
+                  }
+                }}
+                onFocus={() => {
+                  const val = watch("name");
+                  if (val && val.length >= 2) {
+                    const filtered = certificateSuggestions
+                      .filter((c) =>
+                        c.name.toLowerCase().includes(val.toLowerCase()),
+                      )
+                      .slice(0, 8);
+                    setSuggestions(filtered);
+                    setShowSuggestions(filtered.length > 0);
+                  }
+                }}
+                onBlur={(e) => {
+                  register("name").onBlur(e);
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }}
                 placeholder="AWS Solutions Architect"
                 className={errors.name ? "border-destructive" : ""}
+                autoComplete="off"
                 autoFocus
               />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-50 mt-1 w-full bg-background border border-input rounded-md shadow-lg max-h-48 overflow-auto">
+                  {suggestions.map((cert) => (
+                    <button
+                      key={cert.name}
+                      type="button"
+                      onClick={() => {
+                        setValue("name", cert.name);
+                        setValue("issuingOrganization", cert.issuer);
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                    >
+                      <span className="font-medium">{cert.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {cert.issuer}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {errors.name && (
-                <p className="text-xs text-destructive mt-1">{errors.name.message}</p>
+                <p className="text-xs text-destructive mt-1">
+                  {errors.name.message}
+                </p>
               )}
             </div>
             <div>
-              <Label htmlFor="cert-org">Ausstellende Organisation *</Label>
+              <Label htmlFor="cert-org">{t("issuer")} *</Label>
               <Input
                 id="cert-org"
                 {...register("issuingOrganization")}
@@ -498,11 +559,11 @@ function CertificateForm({
           {/* Form Actions */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onCancel}>
-              Abbrechen
+              {tc("cancel")}
             </Button>
             <Button type="submit" className="gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Zertifikat speichern
+              {tc("save")}
             </Button>
           </div>
         </form>
@@ -612,6 +673,8 @@ function ProjectForm({
   onSave: (data: ProjectFormData, id?: string) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("step5");
+  const tc = useTranslations("common");
   const defaultValues: ProjectFormData = project
     ? {
         name: project.name,
@@ -685,14 +748,14 @@ function ProjectForm({
     >
       <Card className="p-8">
         <h3 className="text-lg font-semibold mb-6">
-          {isEditing ? "Projekt bearbeiten" : "Neues Projekt hinzufügen"}
+          {isEditing ? tc("edit") : t("addProject")}
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Name & Role */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="proj-name">Projektname *</Label>
+              <Label htmlFor="proj-name">{t("projectName")} *</Label>
               <Input
                 id="proj-name"
                 {...register("name")}
@@ -716,7 +779,7 @@ function ProjectForm({
 
           {/* Description */}
           <div>
-            <Label htmlFor="proj-description">Beschreibung *</Label>
+            <Label htmlFor="proj-description">{t("projectDescription")} *</Label>
             <Textarea
               id="proj-description"
               {...register("description")}
@@ -747,7 +810,7 @@ function ProjectForm({
 
           {/* URL */}
           <div>
-            <Label htmlFor="proj-url">Projekt-URL (optional)</Label>
+            <Label htmlFor="proj-url">{t("projectUrl")} ({tc("optional")})</Label>
             <Input
               id="proj-url"
               {...register("url")}
@@ -761,7 +824,7 @@ function ProjectForm({
 
           {/* Technologies */}
           <div>
-            <Label htmlFor="proj-technologies">Technologien (kommagetrennt)</Label>
+            <Label htmlFor="proj-technologies">{t("technologies")}</Label>
             <Input
               id="proj-technologies"
               {...register("technologies")}
@@ -850,11 +913,11 @@ function ProjectForm({
           {/* Form Actions */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onCancel}>
-              Abbrechen
+              {tc("cancel")}
             </Button>
             <Button type="submit" className="gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Projekt speichern
+              {tc("save")}
             </Button>
           </div>
         </form>
@@ -865,6 +928,8 @@ function ProjectForm({
 
 // ─── Main Component ────────────────────────────────────────
 export default function Step5CertificatesProjects() {
+  const t = useTranslations("step5");
+  const tc = useTranslations("common");
   const router = useRouter();
   const {
     certificates,
@@ -928,7 +993,7 @@ export default function Step5CertificatesProjects() {
       }
       removeCertificate(id);
       setDeleteCertId(null);
-      toast.success("Zertifikat entfernt");
+      toast.success(tc("success"));
     },
     [certificates, removeCertificate],
   );
@@ -945,7 +1010,7 @@ export default function Step5CertificatesProjects() {
           credentialUrl: data.credentialUrl || undefined,
           attachmentId: attachmentId || undefined,
         });
-        toast.success("Zertifikat aktualisiert");
+        toast.success(tc("success"));
       } else {
         const newId = crypto.randomUUID();
         const newEntry: Certificate = {
@@ -979,7 +1044,7 @@ export default function Step5CertificatesProjects() {
             .catch(() => {});
         }
 
-        toast.success("Zertifikat hinzugefügt");
+        toast.success(tc("success"));
       }
       setEditingCertId(null);
     },
@@ -991,7 +1056,7 @@ export default function Step5CertificatesProjects() {
     (id: string) => {
       removeProject(id);
       setDeleteProjId(null);
-      toast.success("Projekt entfernt");
+      toast.success(tc("success"));
     },
     [removeProject],
   );
@@ -1013,7 +1078,7 @@ export default function Step5CertificatesProjects() {
           technologies,
           role: data.role || undefined,
         });
-        toast.success("Projekt aktualisiert");
+        toast.success(tc("success"));
       } else {
         const newEntry: Project = {
           id: crypto.randomUUID(),
@@ -1026,7 +1091,7 @@ export default function Step5CertificatesProjects() {
           role: data.role || undefined,
         };
         addProject(newEntry);
-        toast.success("Projekt hinzugefügt");
+        toast.success(tc("success"));
       }
       setEditingProjId(null);
     },
@@ -1052,7 +1117,7 @@ export default function Step5CertificatesProjects() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">
-            Schritt 5 von 9: Zertifikate & Projekte
+            Schritt 5 von 9: {t("title")}
           </span>
           <span className="text-sm text-muted-foreground">56%</span>
         </div>
@@ -1107,10 +1172,10 @@ export default function Step5CertificatesProjects() {
           <div className="border-t pt-3 flex items-center justify-between gap-2">
             {lastSaved ? (
               <p className="text-xs text-muted-foreground">
-                Zuletzt gespeichert: {lastSavedText}
+                {tc("saved")}: {lastSavedText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Noch nicht gespeichert</p>
+              <p className="text-xs text-muted-foreground">{tc("save")}</p>
             )}
             <OnlineStatus />
           </div>
@@ -1122,7 +1187,7 @@ export default function Step5CertificatesProjects() {
           <section>
             <div className="flex items-center gap-3 mb-4">
               <Award className="w-6 h-6 text-primary" />
-              <h2 className="text-xl font-bold">Zertifikate</h2>
+              <h2 className="text-xl font-bold">{t("certificates")}</h2>
             </div>
 
             {editingCertId !== null ? (
@@ -1138,7 +1203,7 @@ export default function Step5CertificatesProjects() {
                   <Card className="p-10 text-center">
                     <Award className="w-10 h-10 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">
-                      Noch keine Zertifikate erfasst
+                      {t("noCerts")}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6">
                       Fügen Sie Zertifikate hinzu, um Ihre Weiterbildungen zu dokumentieren.
@@ -1149,7 +1214,7 @@ export default function Step5CertificatesProjects() {
                       disabled={editingProjId !== null}
                     >
                       <Plus className="w-4 h-4" />
-                      Erstes Zertifikat hinzufügen
+                      {t("addCert")}
                     </Button>
                   </Card>
                 ) : (
@@ -1176,7 +1241,7 @@ export default function Step5CertificatesProjects() {
                     disabled={editingProjId !== null}
                   >
                     <Plus className="w-4 h-4" />
-                    Weiteres Zertifikat hinzufügen
+                    {t("addCert")}
                   </Button>
                 )}
               </>
@@ -1187,7 +1252,7 @@ export default function Step5CertificatesProjects() {
           <section>
             <div className="flex items-center gap-3 mb-4">
               <FolderKanban className="w-6 h-6 text-primary" />
-              <h2 className="text-xl font-bold">Projekte & Portfolio</h2>
+              <h2 className="text-xl font-bold">{t("projects")}</h2>
             </div>
 
             {editingProjId !== null ? (
@@ -1203,7 +1268,7 @@ export default function Step5CertificatesProjects() {
                   <Card className="p-10 text-center">
                     <FolderKanban className="w-10 h-10 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">
-                      Noch keine Projekte erfasst
+                      {t("noProjects")}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6">
                       Fügen Sie relevante Projekte hinzu, um Ihre praktische Erfahrung zu
@@ -1215,7 +1280,7 @@ export default function Step5CertificatesProjects() {
                       disabled={editingCertId !== null}
                     >
                       <Plus className="w-4 h-4" />
-                      Erstes Projekt hinzufügen
+                      {t("addProject")}
                     </Button>
                   </Card>
                 ) : (
@@ -1242,7 +1307,7 @@ export default function Step5CertificatesProjects() {
                     disabled={editingCertId !== null}
                   >
                     <Plus className="w-4 h-4" />
-                    Weiteres Projekt hinzufügen
+                    {t("addProject")}
                   </Button>
                 )}
               </>
@@ -1259,7 +1324,7 @@ export default function Step5CertificatesProjects() {
                 className="gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Zurück
+                {tc("back")}
               </Button>
 
               <div className="flex flex-col md:flex-row items-center gap-3">
@@ -1278,7 +1343,7 @@ export default function Step5CertificatesProjects() {
                   onClick={() => router.push("/phases/anschreiben")}
                   className="gap-2"
                 >
-                  Weiter
+                  {tc("next")}
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -1296,14 +1361,14 @@ export default function Step5CertificatesProjects() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Zertifikat löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{tc("delete")}?</AlertDialogTitle>
             <AlertDialogDescription>
               Diese Aktion kann nicht rückgängig gemacht werden. Das Zertifikat und ein
               eventuell angehängter Nachweis werden unwiderruflich entfernt.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -1332,14 +1397,14 @@ export default function Step5CertificatesProjects() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteProjId) handleDeleteProj(deleteProjId);
               }}
             >
-              Löschen
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

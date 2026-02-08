@@ -48,8 +48,18 @@ function createFullState(
     languages: [],
     certificates: [],
     projects: [],
-    jobPosting: null,
-    coverLetter: null,
+    jobPosting: {
+      jobTitle: "Softwareentwickler",
+      companyName: "TechCorp GmbH",
+      jobDescriptionText: "Wir suchen einen erfahrenen Softwareentwickler mit React und TypeScript Kenntnissen für unser Team.",
+      contactPerson: "Frau Schmidt",
+    },
+    coverLetter: {
+      mode: "manual" as const,
+      introduction: "Sehr geehrte Frau Schmidt, mit großem Interesse habe ich Ihre Stellenanzeige gelesen.",
+      mainBody: "In meiner bisherigen Tätigkeit als Softwareentwickler bei der TechCorp konnte ich umfangreiche Erfahrungen in der Webentwicklung sammeln. Besonders meine Kenntnisse in React und TypeScript würde ich gerne in Ihr Team einbringen. Ich bin überzeugt, dass ich mit meiner Erfahrung einen wertvollen Beitrag leisten kann. Die Arbeit in agilen Teams ist mir bestens vertraut und ich freue mich auf neue Herausforderungen. Meine Stärken liegen in der Entwicklung skalierbarer Frontend-Architekturen. Darüber hinaus verfüge ich über ausgeprägte Problemlösungsfähigkeiten und eine hohe Lernbereitschaft, die es mir ermöglichen, mich schnell in neue Technologien und Frameworks einzuarbeiten. Ich bin teamfähig und bringe eine strukturierte Arbeitsweise mit, die zu einer effizienten Projektdurchführung beiträgt.",
+      closing: "Über eine Einladung zu einem persönlichen Gespräch würde ich mich sehr freuen. Gerne erläutere ich Ihnen meine Qualifikationen und Erfahrungen im Detail. Ich stehe Ihnen ab sofort für ein Vorstellungsgespräch zur Verfügung und freue mich darauf, Sie und Ihr Team persönlich kennenzulernen. Mit freundlichen Grüßen, Max Mustermann",
+    },
     coverLetterMeta: null,
     attachments: [],
     documentSelection: {

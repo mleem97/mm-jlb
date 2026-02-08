@@ -5,15 +5,18 @@ import { FileText, Github } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-const links = [
-  { href: "/features", label: "Features" },
-  { href: "/templates", label: "Templates" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/kontakt", label: "Kontakt" },
-];
+import { LanguageSwitcher } from "@/components/features/LanguageSwitcher";
+import { useTranslations } from "@/i18n/client";
 
 export default function SiteHeader() {
+  const t = useTranslations("nav");
+
+  const links = [
+    { href: "/features", label: t("features") },
+    { href: "/templates", label: t("templates") },
+    { href: "/faq", label: t("faq") },
+    { href: "/kontakt", label: t("contact") },
+  ];
   return (
     <motion.nav
       initial={{ y: -20, opacity: 0 }}
@@ -43,6 +46,7 @@ export default function SiteHeader() {
             ))}
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <ThemeToggle />
             <a
               href="https://github.com/mleem97/mm-jlb"
@@ -54,7 +58,7 @@ export default function SiteHeader() {
               <Github className="w-5 h-5" />
             </a>
             <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-              <a href="/builder">Jetzt starten</a>
+              <a href="/builder">{t("startNow")}</a>
             </Button>
           </div>
         </div>

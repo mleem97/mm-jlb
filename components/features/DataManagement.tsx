@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useApplicationStore } from "@/store/applicationStore";
 import { applicationDb } from "@/lib/db/applicationDb";
+import { useTranslations } from "@/i18n/client";
 
 export function DataManagement() {
+  const t = useTranslations("data");
   const [confirmText, setConfirmText] = useState("");
   const resetApplication = useApplicationStore((s) => s.resetApplication);
 
@@ -46,7 +48,7 @@ export function DataManagement() {
     }
 
     setConfirmText("");
-    toast.success("Alle Daten wurden gelöscht");
+    toast.success(t("deleted"));
 
     // Redirect to intro
     window.location.href = "/intro";
@@ -57,15 +59,14 @@ export function DataManagement() {
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="gap-2">
           <Trash2 className="h-4 w-4" />
-          Alle Daten löschen
+          {t("deleteAll")}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Alle Daten löschen?</AlertDialogTitle>
+          <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
           <AlertDialogDescription>
-            Sind Sie sicher? Alle Bewerbungsdaten werden unwiderruflich gelöscht.
-            Diese Aktion kann nicht rückgängig gemacht werden.
+            {t("deleteDescription")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -74,27 +75,27 @@ export function DataManagement() {
             htmlFor="confirm-delete"
             className="text-sm text-muted-foreground"
           >
-            Geben Sie <strong>LÖSCHEN</strong> ein, um zu bestätigen:
+            {t("deleteConfirmLabel")}
           </label>
           <Input
             id="confirm-delete"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
-            placeholder="LÖSCHEN"
+            placeholder={t("deleteConfirmInput")}
             className="mt-2"
           />
         </div>
 
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => setConfirmText("")}>
-            Abbrechen
+            {t("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
-            disabled={confirmText !== "LÖSCHEN"}
+            disabled={confirmText !== t("deleteConfirmInput")}
             onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
           >
-            Endgültig löschen
+            {t("deleteFinal")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

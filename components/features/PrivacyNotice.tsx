@@ -5,10 +5,12 @@ import { ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "@/i18n/client";
 
 const STORAGE_KEY = "jlb-privacy-accepted";
 
 export function PrivacyNotice() {
+  const t = useTranslations("privacy");
   const [open, setOpen] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -40,25 +42,23 @@ export function PrivacyNotice() {
         <div className="mb-4 flex items-center gap-3">
           <ShieldCheck className="h-6 w-6 text-primary" />
           <h2 id="privacy-title" className="text-lg font-semibold">
-            Datenschutzhinweis
+            {t("title")}
           </h2>
         </div>
 
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          Alle Ihre Daten werden ausschließlich lokal in Ihrem Browser
-          gespeichert. Es werden keine Daten an Server oder Cloud-Dienste
-          übertragen. Ihre Bewerbungsdaten verlassen niemals Ihren Computer.
+          {t("notice")}
         </p>
 
         <div className="mb-6">
           <Badge variant="secondary" className="gap-1.5">
             <ShieldCheck className="h-3 w-3" />
-            DSGVO-konform
+            {t("badge")}
           </Badge>
         </div>
 
         <Button onClick={accept} className="w-full">
-          Verstanden
+          {t("accept")}
         </Button>
       </div>
     </div>

@@ -13,6 +13,7 @@ import {
   Info,
   Lightbulb,
   PenLine,
+  Settings,
   Sparkles,
   CalendarDays,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 
 import { useApplicationStore } from "@/store/applicationStore";
+import { useTranslations } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,12 +41,15 @@ import {
 } from "@/lib/schemas/coverLetterFormSchema";
 
 import type { CoverLetterMode, CoverLetterTonality } from "@/types/coverLetter";
+import { useCompletion } from "@ai-sdk/react";
+import { AISettings, useAIConfig } from "@/components/features/AISettings";
+import { buildSystemPrompt, buildUserPrompt, parseGeneratedCoverLetter } from "@/lib/ai/prompts";
 
 // ─── Constants ─────────────────────────────────────────────
 const SUB_STEPS = [
-  { id: 1, label: "Stelleninfos", icon: Briefcase },
-  { id: 2, label: "Anschreiben", icon: PenLine },
-  { id: 3, label: "Pflichtangaben", icon: CalendarDays },
+  { id: 1, key: "subStepJobInfo", icon: Briefcase },
+  { id: 2, key: "subStepCoverLetter", icon: PenLine },
+  { id: 3, key: "subStepMandatory", icon: CalendarDays },
 ] as const;
 
 const NOTICE_PERIOD_OPTIONS = [
@@ -57,42 +62,24 @@ const NOTICE_PERIOD_OPTIONS = [
   "Sonstiges",
 ] as const;
 
-const TONALITY_OPTIONS: { value: CoverLetterTonality; label: string }[] = [
-  { value: "formell", label: "Formell" },
-  { value: "modern-professionell", label: "Modern-professionell" },
-  { value: "kreativ", label: "Kreativ" },
+const TONALITY_OPTIONS: { value: CoverLetterTonality; key: string }[] = [
+  { value: "formell", key: "formal" },
+  { value: "modern-professionell", key: "modernProfessional" },
+  { value: "kreativ", key: "creative" },
 ];
 
-const SMART_TIPS: Record<number, { title: string; tip: string }[]> = {
+const SMART_TIPS: Record<number, { titleKey: string; tipKey: string }[]> = {
   1: [
-    {
-      title: "Firmenadresse im Anschreiben",
-      tip: "Die Firmenadresse wird im Anschreiben als Empfänger verwendet. Achten Sie auf korrekte Schreibweise.",
-    },
-    {
-      title: "Stellenbeschreibung analysieren",
-      tip: "Fügen Sie den Stellentext ein — er hilft später bei der KI-gestützten Anschreibenerstellung.",
-    },
+    { titleKey: "tipCompanyAddressTitle", tipKey: "tipCompanyAddress" },
+    { titleKey: "tipJobDescriptionTitle", tipKey: "tipJobDescription" },
   ],
   2: [
-    {
-      title: "Max. 1 DIN-A4-Seite",
-      tip: "Ein gutes Anschreiben hat maximal eine DIN-A4-Seite (ca. 3.000 Zeichen).",
-    },
-    {
-      title: "Vermeiden Sie Floskeln",
-      tip: 'Seien Sie konkret statt allgemein. Statt "Ich bin teamfähig" lieber ein konkretes Beispiel nennen.',
-    },
+    { titleKey: "tipMaxPageTitle", tipKey: "tipMaxPage" },
+    { titleKey: "tipNoClichesTitle", tipKey: "tipNoClichesDesc" },
   ],
   3: [
-    {
-      title: "Gehaltsvorstellung als Spanne",
-      tip: 'Gehaltsvorstellungen als Spanne angeben wirkt verhandlungsbereit, z.\u00a0B. "55.000\u00a0–\u00a065.000\u00a0€".',
-    },
-    {
-      title: "Pflichtangaben seit 2026",
-      tip: "Viele Arbeitgeber erwarten diese Angaben. Sie beschleunigen den Bewerbungsprozess.",
-    },
+    { titleKey: "tipSalaryRangeTitle", tipKey: "tipSalaryRange" },
+    { titleKey: "tipMandatoryTitle", tipKey: "tipMandatory" },
   ],
 };
 
@@ -108,6 +95,8 @@ function SubStepJobPosting({
   onComplete: () => void;
 }) {
   const { jobPosting, setJobPosting } = useApplicationStore();
+  const t = useTranslations("step6");
+  const tc = useTranslations("common");
 
   const defaultValues: JobPostingFormData = {
     companyName: jobPosting?.companyName ?? "",
@@ -149,7 +138,7 @@ function SubStepJobPosting({
         source: data.source,
         jobDescriptionText: data.jobDescriptionText || undefined,
       });
-      toast.success("Stelleninfos gespeichert");
+      toast.success(t("jobInfoSaved"));
       onComplete();
     },
     [setJobPosting, onComplete],
@@ -160,7 +149,7 @@ function SubStepJobPosting({
       {/* Company Name */}
       <div className="space-y-2">
         <Label htmlFor="companyName">
-          Firmenname <span className="text-destructive">*</span>
+          {t("companyName")} <span className="text-destructive">*</span>
         </Label>
         <Input
           id="companyName"
@@ -174,10 +163,10 @@ function SubStepJobPosting({
 
       {/* Company Address */}
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium">Firmenadresse (optional)</legend>
+        <legend className="text-sm font-medium">{t("companyAddress")}</legend>
         <div className="grid sm:grid-cols-[1fr_120px_1fr] gap-3">
           <div className="space-y-1">
-            <Label htmlFor="companyStreet">Straße</Label>
+            <Label htmlFor="companyStreet">{t("street")}</Label>
             <Input
               id="companyStreet"
               placeholder="Musterstraße 1"
@@ -185,7 +174,7 @@ function SubStepJobPosting({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="companyZip">PLZ</Label>
+            <Label htmlFor="companyZip">{t("zip")}</Label>
             <Input
               id="companyZip"
               placeholder="12345"
@@ -193,7 +182,7 @@ function SubStepJobPosting({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="companyCity">Ort</Label>
+            <Label htmlFor="companyCity">{t("city")}</Label>
             <Input
               id="companyCity"
               placeholder="Berlin"
@@ -205,7 +194,7 @@ function SubStepJobPosting({
 
       {/* Contact Person */}
       <div className="space-y-2">
-        <Label htmlFor="contactPerson">Ansprechpartner (optional)</Label>
+        <Label htmlFor="contactPerson">{t("contactPerson")}</Label>
         <Input
           id="contactPerson"
           placeholder="z. B. Frau Müller"
@@ -216,7 +205,7 @@ function SubStepJobPosting({
       {/* Job Title */}
       <div className="space-y-2">
         <Label htmlFor="jobTitle">
-          Stellentitel <span className="text-destructive">*</span>
+          {t("jobTitle")} <span className="text-destructive">*</span>
         </Label>
         <Input
           id="jobTitle"
@@ -230,7 +219,7 @@ function SubStepJobPosting({
 
       {/* Reference Number */}
       <div className="space-y-2">
-        <Label htmlFor="referenceNumber">Referenznummer (optional)</Label>
+        <Label htmlFor="referenceNumber">{t("referenceNumber")}</Label>
         <Input
           id="referenceNumber"
           placeholder="z. B. REF-2026-042"
@@ -240,9 +229,9 @@ function SubStepJobPosting({
 
       {/* Source */}
       <div className="space-y-2">
-        <Label htmlFor="source">Quelle (optional)</Label>
+        <Label htmlFor="source">{t("source")}</Label>
         <select id="source" className={selectClassName} {...register("source")}>
-          <option value="">Bitte wählen…</option>
+          <option value="">{tc("pleaseSelect")}</option>
           {jobSourceEnum.options.map((value) => (
             <option key={value} value={value}>
               {JOB_SOURCE_LABELS[value]}
@@ -254,11 +243,11 @@ function SubStepJobPosting({
       {/* Job Description Text */}
       <div className="space-y-2">
         <Label htmlFor="jobDescriptionText">
-          Stellenbeschreibung (optional)
+          {t("jobDescription")}
         </Label>
         <Textarea
           id="jobDescriptionText"
-          placeholder="Fügen Sie hier den Stellentext ein — er kann später für die KI-Analyse verwendet werden."
+          placeholder={t("jobDescriptionPlaceholder")}
           rows={5}
           {...register("jobDescriptionText")}
         />
@@ -266,7 +255,7 @@ function SubStepJobPosting({
 
       <div className="flex justify-end pt-2">
         <Button type="submit" className="gap-2">
-          Speichern & weiter
+          {tc("saveAndContinue")}
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
@@ -281,6 +270,8 @@ function SubStepCoverLetterCompose({
   onComplete: () => void;
 }) {
   const { coverLetter, setCoverLetter } = useApplicationStore();
+  const t = useTranslations("step6");
+  const tc = useTranslations("common");
   const [mode, setMode] = useState<CoverLetterMode>(coverLetter?.mode ?? "manual");
 
   // ─── AI stub state ──────────────────────────────────
@@ -314,7 +305,7 @@ function SubStepCoverLetterCompose({
 
     if (!result.success) {
       const firstIssue = result.error.issues[0];
-      toast.error(firstIssue?.message ?? "Bitte alle Pflichtfelder ausfüllen");
+      toast.error(firstIssue?.message ?? t("fillRequired"));
       return;
     }
 
@@ -325,7 +316,7 @@ function SubStepCoverLetterCompose({
       closing,
       fullText: `${introduction}\n\n${mainBody}\n\n${closing}`,
     });
-    toast.success("Anschreiben gespeichert");
+    toast.success(t("coverLetterSaved"));
     onComplete();
   }, [introduction, mainBody, closing, setCoverLetter, onComplete]);
 
@@ -342,7 +333,7 @@ function SubStepCoverLetterCompose({
         tonality: aiTonality,
       },
     });
-    toast.success("KI-Parameter gespeichert");
+    toast.success(t("aiParamsSaved"));
     onComplete();
   }, [
     aiMotivation,
@@ -353,12 +344,93 @@ function SubStepCoverLetterCompose({
     onComplete,
   ]);
 
-  const handleGenerate = useCallback(() => {
-    toast.info("KI-Integration kommt bald!", {
-      description:
-        "Die automatische Anschreibenerstellung wird in einer zukünftigen Version verfügbar sein.",
+  // ─── AI Settings & Generation ──────────────────────
+  const { config: aiConfig } = useAIConfig();
+  const [showAISettings, setShowAISettings] = useState(false);
+  const [generatedText, setGeneratedText] = useState("");
+
+  const { personalData, jobPosting, workExperience, skills, education } = useApplicationStore();
+
+  const { complete, isLoading: isGenerating, error: aiError } = useCompletion({
+    api: "/api/ai/generate",
+    streamProtocol: "text",
+    body: {
+      provider: aiConfig.provider,
+      apiKey: aiConfig.apiKey,
+      model: aiConfig.model,
+      baseURL: aiConfig.baseURL,
+    },
+    onFinish: (_prompt: string, completion: string) => {
+      setGeneratedText(completion);
+      const parsed = parseGeneratedCoverLetter(completion);
+      setIntroduction(parsed.introduction);
+      setMainBody(parsed.mainBody);
+      setClosing(parsed.closing);
+      toast.success(t("coverLetterGenerated"));
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || t("aiError"));
+    },
+  });
+
+  const handleGenerate = useCallback(async () => {
+    if (!aiConfig.apiKey) {
+      toast.error(t("apiKeyMissing"), {
+        action: {
+          label: t("settingsLabel"),
+          onClick: () => setShowAISettings(true),
+        },
+      });
+      return;
+    }
+
+    if (!jobPosting?.jobTitle || !jobPosting?.companyName) {
+      toast.error(t("fillJobInfoFirst"));
+      return;
+    }
+
+    const systemPrompt = buildSystemPrompt(aiTonality);
+    const userPrompt = buildUserPrompt({
+      firstName: personalData.firstName,
+      lastName: personalData.lastName,
+      jobTitle: jobPosting.jobTitle,
+      companyName: jobPosting.companyName,
+      contactPerson: jobPosting.contactPerson,
+      jobDescription: jobPosting.jobDescriptionText,
+      motivation: aiMotivation || undefined,
+      strengths: aiStrengths || undefined,
+      specialQualification: aiSpecialQualification || undefined,
+      workExperience: workExperience.map(
+        (w: { jobTitle: string; company: string; startDate: string; endDate?: string }) => `${w.jobTitle} bei ${w.company} (${w.startDate}–${w.endDate ?? "heute"})`,
+      ),
+      skills: skills.map((s) => s.name),
+      education: education.map(
+        (e) => `${e.degree} ${e.fieldOfStudy ?? ""} - ${e.institution} (${e.startDate}–${e.endDate ?? "heute"})`,
+      ),
     });
-  }, []);
+
+    await complete(userPrompt, {
+      body: {
+        provider: aiConfig.provider,
+        apiKey: aiConfig.apiKey,
+        model: aiConfig.model,
+        systemPrompt,
+        userPrompt,
+      },
+    });
+  }, [
+    aiConfig,
+    aiTonality,
+    aiMotivation,
+    aiStrengths,
+    aiSpecialQualification,
+    personalData,
+    jobPosting,
+    workExperience,
+    skills,
+    education,
+    complete,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -374,7 +446,7 @@ function SubStepCoverLetterCompose({
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          KI-Assistent
+          {t("ai")}
         </button>
         <button
           type="button"
@@ -386,7 +458,7 @@ function SubStepCoverLetterCompose({
           }`}
         >
           <PenLine className="w-4 h-4" />
-          Manuell schreiben
+          {t("manual")}
         </button>
       </div>
 
@@ -403,10 +475,10 @@ function SubStepCoverLetterCompose({
             {/* AI Input Fields */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="aiMotivation">Ihre Motivation</Label>
+                <Label htmlFor="aiMotivation">{t("motivation")}</Label>
                 <Textarea
                   id="aiMotivation"
-                  placeholder="Was motiviert Sie an dieser Stelle? Was reizt Sie am Unternehmen?"
+                  placeholder={t("motivationPlaceholder")}
                   rows={3}
                   value={aiMotivation}
                   onChange={(e) => setAiMotivation(e.target.value)}
@@ -414,10 +486,10 @@ function SubStepCoverLetterCompose({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="aiStrengths">Ihre Stärken</Label>
+                <Label htmlFor="aiStrengths">{t("strengths")}</Label>
                 <Textarea
                   id="aiStrengths"
-                  placeholder="Welche relevanten Stärken bringen Sie mit? (z. B. Teamführung, analytisches Denken)"
+                  placeholder={t("strengthsPlaceholder")}
                   rows={3}
                   value={aiStrengths}
                   onChange={(e) => setAiStrengths(e.target.value)}
@@ -426,11 +498,11 @@ function SubStepCoverLetterCompose({
 
               <div className="space-y-2">
                 <Label htmlFor="aiSpecialQualification">
-                  Besondere Qualifikation (optional)
+                  {t("specialQualification")}
                 </Label>
                 <Textarea
                   id="aiSpecialQualification"
-                  placeholder="Gibt es etwas, das Sie von anderen Bewerbern abhebt?"
+                  placeholder={t("specialQualificationPlaceholder")}
                   rows={2}
                   value={aiSpecialQualification}
                   onChange={(e) => setAiSpecialQualification(e.target.value)}
@@ -438,7 +510,7 @@ function SubStepCoverLetterCompose({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="aiTonality">Tonalität</Label>
+                <Label htmlFor="aiTonality">{t("tonality")}</Label>
                 <select
                   id="aiTonality"
                   className={selectClassName}
@@ -449,41 +521,77 @@ function SubStepCoverLetterCompose({
                 >
                   {TONALITY_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(opt.key)}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Generate Button */}
-            <Button
-              type="button"
-              onClick={handleGenerate}
-              className="gap-2"
-              variant="secondary"
-            >
-              <Sparkles className="w-4 h-4" />
-              Generieren
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={handleGenerate}
+                className="gap-2"
+                variant="secondary"
+                disabled={isGenerating}
+              >
+                <Sparkles className="w-4 h-4" />
+                {isGenerating ? t("generating") : t("generate")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAISettings(true)}
+                className="gap-1.5"
+              >
+                <Settings className="w-4 h-4" />
+                {t("aiSettings")}
+              </Button>
+            </div>
 
-            {/* Generated Text Placeholder */}
-            <Card className="p-6 border-dashed">
-              <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-8">
-                <FileText className="w-10 h-10 mb-3 opacity-40" />
-                <p className="text-sm font-medium">
-                  Hier erscheint Ihr generiertes Anschreiben
-                </p>
-                <p className="text-xs mt-1">
-                  Die KI-Funktion wird in einer zukünftigen Version verfügbar
-                  sein.
-                </p>
-              </div>
-            </Card>
+            {/* AI Error Display */}
+            {aiError ? (
+              <Card className="p-4 border-destructive bg-destructive/5">
+                <p className="text-sm text-destructive">{aiError.message}</p>
+              </Card>
+            ) : null}
+
+            {/* Generated Text or Placeholder */}
+            {generatedText || isGenerating ? (
+              <Card className="p-6">
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  {isGenerating ? (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Sparkles className="w-4 h-4 animate-pulse" />
+                      <span className="text-sm">{t("aiGenerating")}</span>
+                    </div>
+                  ) : null}
+                  <div className="whitespace-pre-wrap">{generatedText}</div>
+                </div>
+              </Card>
+            ) : (
+              <Card className="p-6 border-dashed">
+                <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-8">
+                  <FileText className="w-10 h-10 mb-3 opacity-40" />
+                  <p className="text-sm font-medium">
+                    {t("generatedPreviewTitle")}
+                  </p>
+                  <p className="text-xs mt-1">
+                    {t("generatedPreviewHint")}
+                  </p>
+                </div>
+              </Card>
+            )}
+
+            {/* AI Settings Dialog */}
+            <AISettings open={showAISettings} onClose={() => setShowAISettings(false)} />
 
             <div className="flex justify-end pt-2">
               <Button type="button" onClick={handleSaveAi} className="gap-2">
-                Parameter speichern & weiter
+                {t("saveParamsAndContinue")}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -501,10 +609,10 @@ function SubStepCoverLetterCompose({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="introduction">
-                  Einleitung <span className="text-destructive">*</span>
+                  {t("introduction")} <span className="text-destructive">*</span>
                 </Label>
                 <span className="text-xs text-muted-foreground">
-                  {introduction.length} Zeichen
+                  {t("characterCount", { count: introduction.length })}
                 </span>
               </div>
               <Textarea
@@ -516,7 +624,7 @@ function SubStepCoverLetterCompose({
               />
               {introduction.length > 0 && introduction.length < 10 && (
                 <p className="text-sm text-destructive">
-                  Einleitung muss mindestens 10 Zeichen haben
+                  {t("introMinChars")}
                 </p>
               )}
             </div>
@@ -525,10 +633,10 @@ function SubStepCoverLetterCompose({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="mainBody">
-                  Hauptteil <span className="text-destructive">*</span>
+                  {t("mainBody")} <span className="text-destructive">*</span>
                 </Label>
                 <span className="text-xs text-muted-foreground">
-                  {mainBody.length} Zeichen
+                  {t("characterCount", { count: mainBody.length })}
                 </span>
               </div>
               <Textarea
@@ -540,18 +648,18 @@ function SubStepCoverLetterCompose({
               />
               {mainBody.length > 0 && mainBody.length < 50 && (
                 <p className="text-sm text-destructive">
-                  Hauptteil muss mindestens 50 Zeichen haben
+                  {t("mainBodyMinChars")}
                 </p>
               )}
               <Card className="p-3 bg-muted/50 border-none">
                 <div className="flex gap-2 text-xs text-muted-foreground">
                   <Lightbulb className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
                   <div>
-                    <p className="font-medium text-foreground mb-1">Tipps für den Hauptteil:</p>
+                    <p className="font-medium text-foreground mb-1">{t("mainBodyTipsTitle")}</p>
                     <ul className="space-y-0.5 list-disc list-inside">
-                      <li>Bezug zur Stellenausschreibung herstellen</li>
-                      <li>Konkrete Beispiele und Erfolge nennen</li>
-                      <li>Fachliche und soziale Kompetenzen belegen</li>
+                      <li>{t("mainBodyTip1")}</li>
+                      <li>{t("mainBodyTip2")}</li>
+                      <li>{t("mainBodyTip3")}</li>
                     </ul>
                   </div>
                 </div>
@@ -562,10 +670,10 @@ function SubStepCoverLetterCompose({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="closing">
-                  Schlusssatz <span className="text-destructive">*</span>
+                  {t("closing")} <span className="text-destructive">*</span>
                 </Label>
                 <span className="text-xs text-muted-foreground">
-                  {closing.length} Zeichen
+                  {t("characterCount", { count: closing.length })}
                 </span>
               </div>
               <Textarea
@@ -577,7 +685,7 @@ function SubStepCoverLetterCompose({
               />
               {closing.length > 0 && closing.length < 10 && (
                 <p className="text-sm text-destructive">
-                  Schlusssatz muss mindestens 10 Zeichen haben
+                  {t("closingMinChars")}
                 </p>
               )}
             </div>
@@ -585,23 +693,23 @@ function SubStepCoverLetterCompose({
             {/* Total Character Counter */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                Gesamt: {totalChars} / {MAX_CHARS} Zeichen empfohlen
+                {t("charsRecommended", { current: totalChars, max: MAX_CHARS })}
               </span>
               {totalChars > MAX_CHARS && (
                 <Badge variant="destructive" className="text-xs">
-                  Über dem Limit
+                  {tc("overLimit")}
                 </Badge>
               )}
               {totalChars > 0 && totalChars <= MAX_CHARS && (
                 <Badge variant="secondary" className="text-xs">
-                  ≈ 1 DIN-A4-Seite
+                  {t("approxOnePage")}
                 </Badge>
               )}
             </div>
 
             <div className="flex justify-end pt-2">
               <Button type="button" onClick={handleSaveManual} className="gap-2">
-                Speichern & weiter
+                {tc("saveAndContinue")}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -615,6 +723,8 @@ function SubStepCoverLetterCompose({
 // ─── Sub-Step 6.3: Pflichtangaben 2026 ─────────────────────
 function SubStepMeta({ onComplete }: { onComplete: () => void }) {
   const { coverLetterMeta, setCoverLetterMeta } = useApplicationStore();
+  const t = useTranslations("step6");
+  const tc = useTranslations("common");
   const [noticePeriodCustom, setNoticePeriodCustom] = useState(false);
 
   const defaultValues: CoverLetterMetaFormData = {
@@ -649,7 +759,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
   }, [noticePeriodValue]);
 
   const handleNoticePeriodSelect = (value: string) => {
-    if (value === "Sonstiges") {
+    if (value === "Sonstiges" || value === "__custom__") {
       setNoticePeriodCustom(true);
       setValue("noticePeriod", "", { shouldValidate: true });
     } else {
@@ -670,7 +780,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
             }
           : null,
       );
-      toast.success("Pflichtangaben gespeichert");
+      toast.success(t("mandatoryInfoSaved"));
       onComplete();
     },
     [setCoverLetterMeta, onComplete],
@@ -683,11 +793,9 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
         <div className="flex gap-3">
           <Info className="w-5 h-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
           <div className="text-sm text-sky-800 dark:text-sky-300">
-            <p className="font-medium mb-1">Pflichtangaben seit 2026</p>
+            <p className="font-medium mb-1">{t("mandatoryInfoTitle")}</p>
             <p>
-              Seit 2026 werden diese Angaben in vielen Stellenausschreibungen
-              erwartet. Sie helfen dem Arbeitgeber, den Bewerbungsprozess
-              effizienter zu gestalten.
+              {t("mandatoryInfoDescription")}
             </p>
           </div>
         </div>
@@ -695,7 +803,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
 
       {/* Entry Date */}
       <div className="space-y-2">
-        <Label htmlFor="entryDate">Frühestmögliches Eintrittsdatum</Label>
+        <Label htmlFor="entryDate">{t("entryDate")}</Label>
         <Input
           id="entryDate"
           type="date"
@@ -706,7 +814,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
       {/* Salary Expectation */}
       <div className="space-y-2">
         <Label htmlFor="salaryExpectation">
-          Gehaltsvorstellung (Brutto/Jahr, optional)
+          {t("salaryExpectation")}
         </Label>
         <Input
           id="salaryExpectation"
@@ -714,13 +822,13 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
           {...register("salaryExpectation")}
         />
         <p className="text-xs text-muted-foreground">
-          Tipp: Eine Spanne signalisiert Verhandlungsbereitschaft.
+          {t("salaryTip")}
         </p>
       </div>
 
       {/* Notice Period */}
       <div className="space-y-2">
-        <Label htmlFor="noticePeriod">Kündigungsfrist</Label>
+        <Label htmlFor="noticePeriod">{t("noticePeriod")}</Label>
         {!noticePeriodCustom ? (
           <select
             id="noticePeriod"
@@ -728,7 +836,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
             value={noticePeriodValue ?? ""}
             onChange={(e) => handleNoticePeriodSelect(e.target.value)}
           >
-            <option value="">Bitte wählen…</option>
+            <option value="">{tc("pleaseSelect")}</option>
             {NOTICE_PERIOD_OPTIONS.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -751,7 +859,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
                 setValue("noticePeriod", "", { shouldValidate: true });
               }}
             >
-              Zurück
+              {tc("back")}
             </Button>
           </div>
         )}
@@ -759,7 +867,7 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
 
       <div className="flex justify-end pt-2">
         <Button type="submit" className="gap-2">
-          Speichern & abschließen
+          {tc("saveAndFinish")}
           <CheckCircle2 className="w-4 h-4" />
         </Button>
       </div>
@@ -773,6 +881,8 @@ function SubStepMeta({ onComplete }: { onComplete: () => void }) {
 export default function Step6CoverLetter() {
   const router = useRouter();
   const { lastSaved } = useApplicationStore();
+  const t = useTranslations("step6");
+  const tc = useTranslations("common");
   const [activeSubStep, setActiveSubStep] = useState(1);
   const [lastSavedText, setLastSavedText] = useState("");
 
@@ -797,7 +907,7 @@ export default function Step6CoverLetter() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">
-            Schritt 6 von 9: Anschreiben
+            {tc("stepOf", { current: 6, total: 9 })}: {t("title")}
           </span>
           <span className="text-sm text-muted-foreground">67%</span>
         </div>
@@ -813,19 +923,19 @@ export default function Step6CoverLetter() {
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-sky-500 mt-0.5 shrink-0" />
             <div>
-              <h3 className="font-semibold mb-1">{currentTip?.title}</h3>
-              <p className="text-sm text-muted-foreground">{currentTip?.tip}</p>
+              <h3 className="font-semibold mb-1">{currentTip ? t(currentTip.titleKey) : null}</h3>
+              <p className="text-sm text-muted-foreground">{currentTip ? t(currentTip.tipKey) : null}</p>
             </div>
           </div>
 
           {currentTips.length > 1 && (
             <div className="space-y-2">
-              {currentTips.slice(1).map((t) => (
-                <div key={t.title} className="flex items-start gap-3">
+              {currentTips.slice(1).map((tip) => (
+                <div key={tip.titleKey} className="flex items-start gap-3">
                   <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                   <div>
-                    <h4 className="text-sm font-medium">{t.title}</h4>
-                    <p className="text-xs text-muted-foreground">{t.tip}</p>
+                    <h4 className="text-sm font-medium">{t(tip.titleKey)}</h4>
+                    <p className="text-xs text-muted-foreground">{t(tip.tipKey)}</p>
                   </div>
                 </div>
               ))}
@@ -835,9 +945,9 @@ export default function Step6CoverLetter() {
           {/* Privacy badges */}
           <div className="space-y-2 text-sm border-t pt-3">
             {[
-              "100% lokal gespeichert",
-              "Keine Server-Übertragung",
-              "Jederzeit löschbar",
+              tc("locallyStored"),
+              tc("noServerTransfer"),
+              tc("deletableAnytime"),
             ].map((item) => (
               <div key={item} className="flex items-center gap-2 text-emerald-600">
                 <CheckCircle2 className="w-4 h-4" />
@@ -850,10 +960,10 @@ export default function Step6CoverLetter() {
           <div className="border-t pt-3 flex items-center justify-between gap-2">
             {lastSaved ? (
               <p className="text-xs text-muted-foreground">
-                Zuletzt gespeichert: {lastSavedText}
+                {tc("lastSaved")}: {lastSavedText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Noch nicht gespeichert</p>
+              <p className="text-xs text-muted-foreground">{tc("notSavedYet")}</p>
             )}
             <OnlineStatus />
           </div>
@@ -885,7 +995,7 @@ export default function Step6CoverLetter() {
                   ) : (
                     <Icon className="w-4 h-4" />
                   )}
-                  <span className="hidden sm:inline">{step.label}</span>
+                  <span className="hidden sm:inline">{t(step.key)}</span>
                   <span className="sm:hidden">{step.id}</span>
                 </button>
               );
@@ -926,7 +1036,7 @@ export default function Step6CoverLetter() {
               className="gap-2"
             >
               <ChevronLeft className="w-4 h-4" />
-              Zurück
+              {tc("back")}
             </Button>
 
             <Button
@@ -935,7 +1045,7 @@ export default function Step6CoverLetter() {
               onClick={() => router.push("/phases/layout-design")}
               className="gap-2"
             >
-              Weiter
+              {tc("next")}
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

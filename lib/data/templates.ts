@@ -45,4 +45,40 @@ export const templates: TemplateInfo[] = [
       "Individuelle Akzente",
     ],
   },
+  {
+    id: "tech",
+    name: "Tech / IT",
+    description: "Optimiert für Software-Entwickler, DevOps und Data Scientists. Tech Stack prominent, Projekte vor Berufserfahrung.",
+    previewColors: { bg: "#f8fafc", accent: "#2563eb", text: "#0f172a" },
+    features: [
+      "Tech Stack oben",
+      "Projekte prominent",
+      "GitHub/Portfolio-Links",
+      "ATS-optimiert",
+    ],
+  },
+  {
+    id: "executive",
+    name: "Executive",
+    description: "Elegantes Design für Führungskräfte und Managementpositionen. Dezente Akzente, klare Hierarchie.",
+    previewColors: { bg: "#faf9f6", accent: "#1a1a2e", text: "#333333" },
+    features: [
+      "Dezentes Design",
+      "Management-optimiert",
+      "Serif-Typografie",
+      "Professionelle Hierarchie",
+    ],
+  },
+  {
+    id: "academic",
+    name: "Akademisch",
+    description: "Optimiert für Wissenschaft und Forschung. Publikationen, Lehre, Forschungsprojekte — auch mehrseitig.",
+    previewColors: { bg: "#ffffff", accent: "#2d3748", text: "#1a202c" },
+    features: [
+      "Publikationsliste",
+      "Forschungsfokus",
+      "Mehrseitig",
+      "Wissenschaftlich",
+    ],
+  },
 ];

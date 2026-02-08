@@ -38,6 +38,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import { useApplicationStore } from "@/store/applicationStore";
+import { useTranslations } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,20 +68,20 @@ import type { Attachment, AttachmentCategory } from "@/types/attachment";
 const CURRENT_STEP = 8;
 const TOTAL_STEPS = 9;
 
-const CATEGORY_OPTIONS: { value: AttachmentCategory; label: string }[] = [
-  { value: "zeugnis", label: "Zeugnis" },
-  { value: "zertifikat", label: "Zertifikat" },
-  { value: "referenz", label: "Referenz" },
-  { value: "arbeitsprobe", label: "Arbeitsprobe" },
-  { value: "sonstiges", label: "Sonstiges" },
+const CATEGORY_OPTIONS: { value: AttachmentCategory; key: string }[] = [
+  { value: "zeugnis", key: "types.zeugnis" },
+  { value: "zertifikat", key: "types.zertifikat" },
+  { value: "referenz", key: "types.referenz" },
+  { value: "arbeitsprobe", key: "types.arbeitsprobe" },
+  { value: "sonstiges", key: "types.sonstiges" },
 ];
 
-const CATEGORY_LABEL: Record<AttachmentCategory, string> = {
-  zeugnis: "Zeugnis",
-  zertifikat: "Zertifikat",
-  referenz: "Referenz",
-  arbeitsprobe: "Arbeitsprobe",
-  sonstiges: "Sonstiges",
+const CATEGORY_KEYS: Record<AttachmentCategory, string> = {
+  zeugnis: "types.zeugnis",
+  zertifikat: "types.zertifikat",
+  referenz: "types.referenz",
+  arbeitsprobe: "types.arbeitsprobe",
+  sonstiges: "types.sonstiges",
 };
 
 const SMART_TIPS = [
@@ -128,6 +129,7 @@ function SortableAttachmentCard({
   onDelete: (id: string) => void;
   onTitleChange: (id: string, title: string) => void;
 }) {
+  const t = useTranslations("step8");
   const {
     attributes,
     listeners,
@@ -159,7 +161,7 @@ function SortableAttachmentCard({
           className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
           {...attributes}
           {...listeners}
-          aria-label="Anlage verschieben"
+          aria-label={t("moveAttachment")}
         >
           <GripVertical className="w-5 h-5" />
         </button>
@@ -173,7 +175,7 @@ function SortableAttachmentCard({
             value={customTitle}
             onChange={(e) => onTitleChange(attachment.id, e.target.value)}
             className="h-7 text-sm font-medium border-transparent hover:border-border focus:border-primary px-1"
-            aria-label="Anlagen-Titel"
+            aria-label={t("attachmentTitle")}
           />
           <p className="text-xs text-muted-foreground px-1">
             {formatFileSize(attachment.fileSize)} · {attachment.fileType.toUpperCase()}
@@ -187,11 +189,11 @@ function SortableAttachmentCard({
             onCategoryChange(attachment.id, e.target.value as AttachmentCategory)
           }
           className="text-xs border rounded-md px-2 py-1 bg-background"
-          aria-label="Kategorie wählen"
+          aria-label={t("selectCategory")}
         >
           {CATEGORY_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.key)}
             </option>
           ))}
         </select>
@@ -203,7 +205,7 @@ function SortableAttachmentCard({
             variant="ghost"
             size="icon"
             onClick={() => onPreview(attachment)}
-            aria-label="Vorschau"
+            aria-label={t("imagePreview")}
           >
             <Eye className="w-4 h-4" />
           </Button>
@@ -212,7 +214,7 @@ function SortableAttachmentCard({
             variant="ghost"
             size="icon"
             onClick={() => onDelete(attachment.id)}
-            aria-label="Anlage löschen"
+            aria-label={t("deleteAttachment")}
             className="text-destructive hover:text-destructive"
           >
             <Trash2 className="w-4 h-4" />
@@ -227,6 +229,8 @@ function SortableAttachmentCard({
 
 export default function Step8Attachments() {
   const router = useRouter();
+  const t = useTranslations("step8");
+  const tc = useTranslations("common");
 
   const {
     attachments,
@@ -372,7 +376,7 @@ export default function Step8Attachments() {
 
           toast.success(`${file.name} hinzugefügt`);
         } catch {
-          toast.error(`Fehler beim Hochladen von ${file.name}`);
+          toast.error(t("uploadError", { name: file.name }));
           setUploadProgress((prev) => {
             const next = { ...prev };
             delete next[id];
@@ -426,7 +430,7 @@ export default function Step8Attachments() {
     async (id: string, category: AttachmentCategory) => {
       updateAttachment(id, { category });
       await applicationDb.attachments.update(id, { category });
-      toast.success("Kategorie aktualisiert");
+      toast.success(t("categoryUpdated"));
     },
     [updateAttachment],
   );
@@ -436,7 +440,7 @@ export default function Step8Attachments() {
     try {
       const record = await applicationDb.attachments.get(attachment.id);
       if (!record?.blob) {
-        toast.error("Datei nicht gefunden");
+        toast.error(t("fileNotFound"));
         return;
       }
 
@@ -459,7 +463,7 @@ export default function Step8Attachments() {
         URL.revokeObjectURL(url);
       }
     } catch {
-      toast.error("Vorschau konnte nicht geladen werden");
+      toast.error(t("previewFailed"));
     }
   }, []);
 
@@ -480,7 +484,7 @@ export default function Step8Attachments() {
         delete next[id];
         return next;
       });
-      toast.success("Anlage entfernt");
+      toast.success(t("attachmentRemoved"));
     },
     [removeAttachment],
   );
@@ -494,7 +498,7 @@ export default function Step8Attachments() {
         const newIndex = attachments.findIndex((a) => a.id === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
           reorderAttachments(oldIndex, newIndex);
-          toast.success("Reihenfolge aktualisiert");
+          toast.success(t("orderUpdated"));
         }
       }
     },
@@ -518,7 +522,7 @@ export default function Step8Attachments() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">
-            Schritt {CURRENT_STEP} von {TOTAL_STEPS}: Anlagen
+            {tc("stepOf", { current: CURRENT_STEP, total: TOTAL_STEPS })}: {t("title")}
           </span>
           <span className="text-sm text-muted-foreground">{progressPercent}%</span>
         </div>
@@ -543,10 +547,10 @@ export default function Step8Attachments() {
               <div className="p-5 border-b">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  Dateien hochladen
+                  {t("uploadFiles")}
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  PDF, JPEG, PNG, WebP oder DOCX — max. 10 MB pro Datei
+                  {t("uploadHint")}
                 </p>
               </div>
 
@@ -573,10 +577,10 @@ export default function Step8Attachments() {
                   className={`h-10 w-10 mx-auto mb-3 ${isDragOver ? "text-primary" : "text-muted-foreground"}`}
                 />
                 <p className="font-medium">
-                  Dateien hierher ziehen oder klicken zum Auswählen
+                  {t("dragOrClick")}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Mehrere Dateien gleichzeitig möglich
+                  {t("multipleFiles")}
                 </p>
               </div>
 
@@ -587,7 +591,7 @@ export default function Step8Attachments() {
                 accept={ACCEPT_STRING}
                 onChange={handleFileSelect}
                 className="hidden"
-                aria-label="Datei auswählen"
+                aria-label={t("selectFile")}
               />
 
               {/* Upload progress indicators */}
@@ -596,7 +600,7 @@ export default function Step8Attachments() {
                   {Object.entries(uploadProgress).map(([id, progress]) => (
                     <div key={id} className="space-y-1">
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Wird verarbeitet…</span>
+                        <span>{tc("processing")}</span>
                         <span>{progress}%</span>
                       </div>
                       <Progress value={progress} className="h-1.5" />
@@ -617,10 +621,10 @@ export default function Step8Attachments() {
               <Card>
                 <div className="p-5 border-b flex items-center justify-between">
                   <h2 className="text-lg font-semibold">
-                    Hochgeladene Anlagen ({attachments.length})
+                    {t("uploadedAttachments", { count: attachments.length })}
                   </h2>
                   <div className="text-sm text-muted-foreground">
-                    Gesamt: {formatFileSize(totalSize)} / {formatFileSize(MAX_TOTAL_SIZE)}
+                    {tc("total")}: {formatFileSize(totalSize)} / {formatFileSize(MAX_TOTAL_SIZE)}
                   </div>
                 </div>
 
@@ -632,7 +636,7 @@ export default function Step8Attachments() {
                   />
                   {totalSizePercent > 80 && (
                     <p className="text-xs text-amber-600 mt-1">
-                      Achtung: Gesamtgröße nähert sich dem Limit
+                      {t("sizeWarning")}
                     </p>
                   )}
                 </div>
@@ -681,10 +685,10 @@ export default function Step8Attachments() {
                 <div className="p-5 border-b">
                   <h2 className="text-lg font-semibold flex items-center gap-2">
                     <List className="h-5 w-5" />
-                    Anlagenverzeichnis
+                    {t("attachmentIndex")}
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Automatisch generierte Übersicht Ihrer Anlagen
+                    {t("attachmentIndexDesc")}
                   </p>
                 </div>
 
@@ -699,7 +703,7 @@ export default function Step8Attachments() {
                         onChange={() => setIndexAsSeparatePage(true)}
                         className="accent-primary"
                       />
-                      <span className="text-sm">Anlagenverzeichnis als eigene Seite</span>
+                      <span className="text-sm">{t("indexAsSeparatePage")}</span>
                     </Label>
                     <Label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -709,14 +713,14 @@ export default function Step8Attachments() {
                         onChange={() => setIndexAsSeparatePage(false)}
                         className="accent-primary"
                       />
-                      <span className="text-sm">Im Anschreiben erwähnen</span>
+                      <span className="text-sm">{t("indexInCoverLetter")}</span>
                     </Label>
                   </div>
 
                   {/* Preview */}
                   <Card className="p-4 bg-muted/30 border-dashed">
                     <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">
-                      Vorschau
+                      {t("imagePreview")}
                     </p>
                     <ol className="space-y-2 list-decimal list-inside">
                       {attachments.map((att) => {
@@ -729,7 +733,7 @@ export default function Step8Attachments() {
                               {title}
                             </span>
                             <Badge variant="secondary" className="text-xs shrink-0">
-                              {CATEGORY_LABEL[att.category]}
+                              {t(CATEGORY_KEYS[att.category])}
                             </Badge>
                             <span className="text-xs text-muted-foreground shrink-0">
                               ({att.fileType.toUpperCase()})
@@ -755,10 +759,10 @@ export default function Step8Attachments() {
             <Card className="p-5 space-y-4 border-primary/20">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-amber-500" />
-                Tipps
+                {tc("tips")}
               </h3>
               <ul className="space-y-3">
-                {SMART_TIPS.map((tip, i) => (
+                {[t("tip1"), t("tip2"), t("tip3")].map((tip, i) => (
                   <li
                     key={i}
                     className="flex gap-2 text-xs text-muted-foreground leading-relaxed"
@@ -778,7 +782,7 @@ export default function Step8Attachments() {
               animate={{ opacity: 1 }}
               className="text-xs text-muted-foreground text-center"
             >
-              Zuletzt gespeichert:{" "}
+              {tc("lastSaved")}:{" "}
               {lastSaved.toLocaleTimeString("de-DE", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -798,7 +802,7 @@ export default function Step8Attachments() {
         <Button asChild variant="outline">
           <Link href="/phases/layout-design">
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Zurück
+            {tc("back")}
           </Link>
         </Button>
 
@@ -806,11 +810,11 @@ export default function Step8Attachments() {
           <Button asChild variant="ghost" className="text-muted-foreground">
             <Link href="/phases/export">
               <SkipForward className="h-4 w-4 mr-1" />
-              Überspringen
+              {tc("skip")}
             </Link>
           </Button>
           <Button onClick={handleNext}>
-            Weiter
+            {tc("next")}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
@@ -820,19 +824,18 @@ export default function Step8Attachments() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Anlage löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Die Datei wird unwiderruflich entfernt. Dieser Vorgang kann nicht
-              rückgängig gemacht werden.
+              {t("deleteDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              Löschen
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -844,19 +847,19 @@ export default function Step8Attachments() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-8"
           onClick={closePreview}
           role="dialog"
-          aria-label="Bildvorschau"
+          aria-label={t("imagePreview")}
         >
           <button
             onClick={closePreview}
             className="absolute top-4 right-4 text-white hover:text-white/80"
-            aria-label="Schließen"
+            aria-label={tc("close")}
           >
             <X className="h-8 w-8" />
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewUrl}
-            alt="Vorschau"
+            alt={t("imagePreview")}
             className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
             onClick={(e) => e.stopPropagation()}
           />
