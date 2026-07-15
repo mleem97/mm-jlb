@@ -60,7 +60,6 @@ export default {
       "react-doctor/no-inline-exhaustive-style",
       "react-doctor/no-many-boolean-props",
       "react-doctor/no-multi-comp",
-      "react-doctor/no-nested-component-definition",
       "react-doctor/no-pure-black-background",
       "react-doctor/no-react19-deprecated-apis",
       "react-doctor/no-render-in-render",
