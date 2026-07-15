@@ -12,7 +12,10 @@ export interface EmailTemplateData {
 
 export type EmailTemplate = "formal" | "modern";
 
-const templates: Record<EmailTemplate, (data: EmailTemplateData) => { subject: string; body: string }> = {
+const templates: Record<
+  EmailTemplate,
+  (data: EmailTemplateData) => { subject: string; body: string }
+> = {
   formal: (data) => ({
     subject: `Bewerbung als ${data.jobTitle} – ${data.firstName} ${data.lastName}`,
     body: `Sehr geehrte${data.contactPerson ? ` ${data.contactPerson}` : " Damen und Herren"},
@@ -41,7 +44,12 @@ export function generateEmailContent(
   template: EmailTemplate,
   data: EmailTemplateData,
 ): { subject: string; body: string } {
-  return templates[template](data);
+  switch (template) {
+    case "formal":
+      return templates.formal(data);
+    case "modern":
+      return templates.modern(data);
+  }
 }
 
 export const EMAIL_TEMPLATE_LABELS: Record<EmailTemplate, string> = {

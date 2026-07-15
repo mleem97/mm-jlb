@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+
 import { calculateJobMatch } from "@/lib/utils/jobMatchScore";
+import type { Education } from "@/types/education";
 import type { Skill } from "@/types/skills";
 import type { WorkExperience } from "@/types/workExperience";
-import type { Education } from "@/types/education";
 
 interface JobMatchScoreProps {
   jobDescriptionText: string;
@@ -14,9 +15,9 @@ interface JobMatchScoreProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score < 40) return "#ef4444"; // red
-  if (score <= 70) return "#eab308"; // yellow
-  return "#22c55e"; // green
+  if (score < 40) return "#ef4444";
+  if (score <= 70) return "#eab308";
+  return "#22c55e";
 }
 
 function getScoreLabel(score: number): string {
@@ -37,7 +38,7 @@ export function JobMatchScore({
     [jobDescriptionText, skills, workExperience, education],
   );
 
-  if (!jobDescriptionText?.trim()) return null;
+  if (!jobDescriptionText.trim()) return null;
 
   const color = getScoreColor(result.score);
   const radius = 54;
@@ -45,13 +46,12 @@ export function JobMatchScore({
   const dashOffset = circumference - (result.score / 100) * circumference;
 
   return (
-    <div className="rounded-lg border bg-card p-6 space-y-4">
+    <div className="space-y-4 rounded-lg border bg-card p-6">
       <h3 className="text-lg font-semibold">Job-Match-Score</h3>
 
-      {/* Circular gauge */}
       <div className="flex items-center gap-6">
-        <div className="relative w-32 h-32">
-          <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+        <div className="relative size-32">
+          <svg className="size-32 -rotate-90" viewBox="0 0 120 120">
             <circle
               cx="60"
               cy="60"
@@ -75,7 +75,7 @@ export function JobMatchScore({
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold" style={{ color }}>
+            <span className="text-2xl font-semibold" style={{ color }}>
               {result.score}%
             </span>
             <span className="text-xs text-muted-foreground">
@@ -84,73 +84,66 @@ export function JobMatchScore({
           </div>
         </div>
 
-        <div className="flex-1 space-y-2 text-sm">
-          <p className="text-muted-foreground">
-            {result.matchedKeywords.length} von{" "}
-            {result.matchedKeywords.length + result.missingKeywords.length}{" "}
-            Keywords stimmen überein
-          </p>
-        </div>
+        <p className="flex-1 text-sm text-muted-foreground">
+          {result.matchedKeywords.length} von{" "}
+          {result.matchedKeywords.length + result.missingKeywords.length}{" "}
+          Keywords stimmen überein
+        </p>
       </div>
 
-      {/* Matched keywords */}
-      {result.matchedKeywords.length > 0 && (
+      {result.matchedKeywords.length > 0 ? (
         <div>
-          <p className="text-sm font-medium mb-2">
-            Übereinstimmende Keywords
-          </p>
+          <p className="mb-2 text-sm font-medium">Übereinstimmende Keywords</p>
           <div className="flex flex-wrap gap-1.5">
-            {result.matchedKeywords.map((kw) => (
+            {result.matchedKeywords.map((keyword) => (
               <span
-                key={kw}
+                key={keyword}
                 className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400"
               >
-                {kw}
+                {keyword}
               </span>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {/* Missing keywords */}
-      {result.missingKeywords.length > 0 && (
+      {result.missingKeywords.length > 0 ? (
         <div>
-          <p className="text-sm font-medium mb-2">Fehlende Keywords</p>
+          <p className="mb-2 text-sm font-medium">Fehlende Keywords</p>
           <div className="flex flex-wrap gap-1.5">
-            {result.missingKeywords.slice(0, 10).map((kw) => (
+            {result.missingKeywords.slice(0, 10).map((keyword) => (
               <span
-                key={kw}
+                key={keyword}
                 className="inline-flex items-center rounded-full border border-red-300 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:border-red-700 dark:text-red-400"
               >
-                {kw}
+                {keyword}
               </span>
             ))}
-            {result.missingKeywords.length > 10 && (
-              <span className="text-xs text-muted-foreground self-center">
+            {result.missingKeywords.length > 10 ? (
+              <span className="self-center text-xs text-muted-foreground">
                 +{result.missingKeywords.length - 10} weitere
               </span>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {/* Suggestions */}
-      {result.suggestions.length > 0 && (
+      {result.suggestions.length > 0 ? (
         <div>
-          <p className="text-sm font-medium mb-2">Vorschläge</p>
+          <p className="mb-2 text-sm font-medium">Vorschläge</p>
           <ul className="space-y-1">
-            {result.suggestions.map((s) => (
+            {result.suggestions.map((suggestion) => (
               <li
-                key={s}
-                className="text-sm text-muted-foreground flex items-start gap-2"
+                key={suggestion}
+                className="flex items-start gap-2 text-sm text-muted-foreground"
               >
-                <span className="text-yellow-500 mt-0.5">💡</span>
-                {s}
+                <span className="mt-0.5 text-yellow-500">💡</span>
+                {suggestion}
               </li>
             ))}
           </ul>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

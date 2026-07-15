@@ -2,12 +2,15 @@
 
 import { useCallback, useState, useSyncExternalStore } from "react";
 
-type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "dark" | "system";
 type ResolvedTheme = "light" | "dark";
 
 const STORAGE_KEY = "jlb-theme";
 
-/* ─── Helpers ──────────────────────────────────────────────── */
+function isTheme(value: string | null): value is Theme {
+  return value === "light" || value === "dark" || value === "system";
+}
+
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -17,33 +20,31 @@ function getSystemTheme(): ResolvedTheme {
 
 function getStoredTheme(): Theme {
   if (typeof window === "undefined") return "system";
-  return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "system";
+  const storedTheme = localStorage.getItem(STORAGE_KEY);
+  return isTheme(storedTheme) ? storedTheme : "system";
 }
 
-function resolve(theme: Theme): ResolvedTheme {
+function resolveTheme(theme: Theme): ResolvedTheme {
   return theme === "system" ? getSystemTheme() : theme;
 }
 
-function applyTheme(resolved: ResolvedTheme) {
+function applyTheme(resolvedTheme: ResolvedTheme) {
   const root = document.documentElement;
   root.classList.remove("light", "dark");
-  root.classList.add(resolved);
+  root.classList.add(resolvedTheme);
 }
 
-/* ─── External store for SSR-safe subscription ─────────────── */
 let listeners: Array<() => void> = [];
 let currentTheme: Theme = "system";
 
 function emitChange() {
-  for (const listener of listeners) {
-    listener();
-  }
+  for (const listener of listeners) listener();
 }
 
 function subscribe(listener: () => void) {
   listeners = [...listeners, listener];
   return () => {
-    listeners = listeners.filter((l) => l !== listener);
+    listeners = listeners.filter((candidate) => candidate !== listener);
   };
 }
 
@@ -55,16 +56,14 @@ function getServerSnapshot(): Theme {
   return "system";
 }
 
-/* ─── Init (runs once in browser) ──────────────────────────── */
 let initialized = false;
 function initTheme() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
 
   currentTheme = getStoredTheme();
-  applyTheme(resolve(currentTheme));
+  applyTheme(resolveTheme(currentTheme));
 
-  // Listen for system theme changes
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", () => {
@@ -75,28 +74,32 @@ function initTheme() {
     });
 }
 
-/* ─── Hook ─────────────────────────────────────────────────── */
 export function useTheme(): {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   resolvedTheme: ResolvedTheme;
 } {
-  // Ensure initialisation on first render (client)
   const [ready] = useState(() => {
     initTheme();
     return typeof window !== "undefined";
   });
 
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const theme = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
-  const setTheme = useCallback((next: Theme) => {
-    currentTheme = next;
-    localStorage.setItem(STORAGE_KEY, next);
-    applyTheme(resolve(next));
+  const setTheme = useCallback((nextTheme: Theme) => {
+    currentTheme = nextTheme;
+    localStorage.setItem(STORAGE_KEY, nextTheme);
+    applyTheme(resolveTheme(nextTheme));
     emitChange();
   }, []);
 
-  const resolvedTheme: ResolvedTheme = ready ? resolve(theme) : "dark";
+  const resolvedTheme: ResolvedTheme = ready
+    ? resolveTheme(theme)
+    : "dark";
 
   return { theme, setTheme, resolvedTheme };
 }

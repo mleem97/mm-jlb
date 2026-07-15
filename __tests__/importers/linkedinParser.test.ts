@@ -32,11 +32,11 @@ describe("parseLinkedInExport", () => {
 
     const { data } = parseLinkedInExport(csvContents);
     expect(data.workExperience).toHaveLength(1);
-    expect(data.workExperience![0].company).toBe("Acme GmbH");
-    expect(data.workExperience![0].jobTitle).toBe("Developer");
-    expect(data.workExperience![0].startDate).toBe("2020-01");
-    expect(data.workExperience![0].endDate).toBe("2022-12");
-    expect(data.workExperience![0].isCurrentJob).toBe(false);
+    expect(data.workExperience?.[0].company).toBe("Acme GmbH");
+    expect(data.workExperience?.[0].jobTitle).toBe("Developer");
+    expect(data.workExperience?.[0].startDate).toBe("2020-01");
+    expect(data.workExperience?.[0].endDate).toBe("2022-12");
+    expect(data.workExperience?.[0].isCurrentJob).toBe(false);
   });
 
   it("parses education entries", () => {
@@ -48,11 +48,11 @@ describe("parseLinkedInExport", () => {
 
     const { data } = parseLinkedInExport(csvContents);
     expect(data.education).toHaveLength(1);
-    expect(data.education![0].institution).toBe("TU Berlin");
-    expect(data.education![0].degree).toBe("B.Sc.");
-    expect(data.education![0].startDate).toBe("2016-01");
-    expect(data.education![0].endDate).toBe("2020-01");
-    expect(data.education![0].fieldOfStudy).toBe("Informatik");
+    expect(data.education?.[0].institution).toBe("TU Berlin");
+    expect(data.education?.[0].degree).toBe("B.Sc.");
+    expect(data.education?.[0].startDate).toBe("2016-01");
+    expect(data.education?.[0].endDate).toBe("2020-01");
+    expect(data.education?.[0].fieldOfStudy).toBe("Informatik");
   });
 
   it("parses skills", () => {
@@ -63,12 +63,11 @@ describe("parseLinkedInExport", () => {
 
     const { data } = parseLinkedInExport(csvContents);
     expect(data.skills).toHaveLength(3);
-    expect(data.skills![0].name).toBe("TypeScript");
-    expect(data.skills![1].name).toBe("React");
-    expect(data.skills![2].name).toBe("Node.js");
-    // default category and level
-    expect(data.skills![0].category).toBe("hard");
-    expect(data.skills![0].level).toBe(3);
+    expect(data.skills?.[0].name).toBe("TypeScript");
+    expect(data.skills?.[1].name).toBe("React");
+    expect(data.skills?.[2].name).toBe("Node.js");
+    expect(data.skills?.[0].category).toBe("hard");
+    expect(data.skills?.[0].level).toBe(3);
   });
 
   it("handles missing CSVs gracefully with warnings", () => {
@@ -81,10 +80,10 @@ describe("parseLinkedInExport", () => {
     expect(data.education).toEqual([]);
     expect(data.skills).toEqual([]);
     expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings.some((w) => w.includes("Profildaten"))).toBe(true);
-    expect(warnings.some((w) => w.includes("Positions"))).toBe(true);
-    expect(warnings.some((w) => w.includes("Education"))).toBe(true);
-    expect(warnings.some((w) => w.includes("Skills"))).toBe(true);
+    expect(warnings.some((warning) => warning.includes("Profildaten"))).toBe(true);
+    expect(warnings.some((warning) => warning.includes("Positions"))).toBe(true);
+    expect(warnings.some((warning) => warning.includes("Education"))).toBe(true);
+    expect(warnings.some((warning) => warning.includes("Skills"))).toBe(true);
   });
 
   it('formats dates: "Jan 2020" → "2020-01"', () => {
@@ -95,18 +94,19 @@ describe("parseLinkedInExport", () => {
     };
 
     const { data } = parseLinkedInExport(csvContents);
-    expect(data.workExperience![0].startDate).toBe("2020-01");
-    expect(data.workExperience![0].endDate).toBe("2023-03");
+    expect(data.workExperience?.[0].startDate).toBe("2020-01");
+    expect(data.workExperience?.[0].endDate).toBe("2023-03");
   });
 
   it('formats dates: "2020" → "2020-01"', () => {
     const csvContents = {
       Profile: "First Name,Last Name\nMax,Mustermann",
-      Education: "School Name,Degree Name,Start Date,End Date\nTU Berlin,BSc,2016,2020",
+      Education:
+        "School Name,Degree Name,Start Date,End Date\nTU Berlin,BSc,2016,2020",
     };
 
     const { data } = parseLinkedInExport(csvContents);
-    expect(data.education![0].startDate).toBe("2016-01");
-    expect(data.education![0].endDate).toBe("2020-01");
+    expect(data.education?.[0].startDate).toBe("2016-01");
+    expect(data.education?.[0].endDate).toBe("2020-01");
   });
 });

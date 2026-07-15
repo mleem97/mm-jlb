@@ -1,45 +1,50 @@
 "use client";
 
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 
-const icons = {
-  light: Sun,
-  dark: Moon,
-  system: Monitor,
-} as const;
+type Theme = "light" | "dark" | "system";
 
-const labels = {
-  light: "Helles Design",
-  dark: "Dunkles Design",
-  system: "Systemeinstellung",
-} as const;
-
-const order: Array<"light" | "dark" | "system"> = ["light", "dark", "system"];
+function getThemePresentation(theme: Theme): {
+  icon: LucideIcon;
+  label: string;
+  nextTheme: Theme;
+} {
+  switch (theme) {
+    case "light":
+      return { icon: Sun, label: "Helles Design", nextTheme: "dark" };
+    case "dark":
+      return { icon: Moon, label: "Dunkles Design", nextTheme: "system" };
+    case "system":
+      return {
+        icon: Monitor,
+        label: "Systemeinstellung",
+        nextTheme: "light",
+      };
+  }
+}
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
-
-  const cycle = () => {
-    const idx = order.indexOf(theme);
-    setTheme(order[(idx + 1) % order.length]);
-  };
-
-  const Icon = icons[theme];
+  const presentation = getThemePresentation(theme);
+  const Icon = presentation.icon;
 
   return (
     <button
       type="button"
-      onClick={cycle}
-      aria-label={labels[theme]}
-      title={labels[theme]}
+      onClick={() => {
+        setTheme(presentation.nextTheme);
+      }}
+      aria-label={presentation.label}
+      title={presentation.label}
       className={cn(
-        "p-2 rounded-full hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
+        "rounded-full p-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
         className,
       )}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className="size-5" />
     </button>
   );
 }
