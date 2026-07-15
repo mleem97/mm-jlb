@@ -88,3 +88,5 @@ jobs:
           test "${{ steps.types.outcome }}" = "success"
           test "${{ steps.unit.outcome }}" = "success"
           test "${{ steps.build.outcome }}" = "success"
+
+# Triggered after the workflow exists on the branch.
