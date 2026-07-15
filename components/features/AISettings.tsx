@@ -5,17 +5,25 @@ import { Key, Settings, Shield, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { useTranslations } from "@/i18n/client";
 import {
   PROVIDER_MODELS,
-  PROVIDER_LABELS,
   type AIProvider,
 } from "@/lib/ai/providers";
 
 const AI_STORAGE_PREFIX = "jlb:ai";
+
+const PROVIDER_OPTIONS: { value: AIProvider; label: string }[] = [
+  { value: "openai", label: "OpenAI" },
+  { value: "anthropic", label: "Anthropic" },
+  { value: "google", label: "Google Gemini" },
+  { value: "ollama", label: "Ollama (Lokal)" },
+  { value: "perplexity", label: "Perplexity AI" },
+  { value: "kimi", label: "Kimi (Moonshot)" },
+];
 
 export interface AIConfig {
   provider: AIProvider;
@@ -24,13 +32,42 @@ export interface AIConfig {
   baseURL: string;
 }
 
+function isAIProvider(value: string | null): value is AIProvider {
+  return PROVIDER_OPTIONS.some((option) => option.value === value);
+}
+
+function getProviderModels(provider: AIProvider) {
+  switch (provider) {
+    case "openai":
+      return PROVIDER_MODELS.openai;
+    case "anthropic":
+      return PROVIDER_MODELS.anthropic;
+    case "google":
+      return PROVIDER_MODELS.google;
+    case "ollama":
+      return PROVIDER_MODELS.ollama;
+    case "perplexity":
+      return PROVIDER_MODELS.perplexity;
+    case "kimi":
+      return PROVIDER_MODELS.kimi;
+  }
+}
+
 function loadAIConfig(): AIConfig {
   if (typeof window === "undefined") {
-    return { provider: "openai", model: "gpt-4o-mini", apiKey: "", baseURL: "" };
+    return {
+      provider: "openai",
+      model: "gpt-4o-mini",
+      apiKey: "",
+      baseURL: "",
+    };
   }
+
+  const storedProvider = localStorage.getItem(`${AI_STORAGE_PREFIX}:provider`);
   return {
-    provider: (localStorage.getItem(`${AI_STORAGE_PREFIX}:provider`) as AIProvider) ?? "openai",
-    model: localStorage.getItem(`${AI_STORAGE_PREFIX}:model`) ?? "gpt-4o-mini",
+    provider: isAIProvider(storedProvider) ? storedProvider : "openai",
+    model:
+      localStorage.getItem(`${AI_STORAGE_PREFIX}:model`) ?? "gpt-4o-mini",
     apiKey: localStorage.getItem(`${AI_STORAGE_PREFIX}:apiKey`) ?? "",
     baseURL: localStorage.getItem(`${AI_STORAGE_PREFIX}:baseURL`) ?? "",
   };
@@ -44,16 +81,20 @@ function saveAIConfig(config: AIConfig) {
 }
 
 export function useAIConfig() {
-  const [config, setConfig] = useState<AIConfig>({ provider: "openai", model: "gpt-4o-mini", apiKey: "", baseURL: "" });
+  const [config, setConfig] = useState<AIConfig>({
+    provider: "openai",
+    model: "gpt-4o-mini",
+    apiKey: "",
+    baseURL: "",
+  });
 
-  // Read from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
     setConfig(loadAIConfig());
   }, []);
 
   const updateConfig = useCallback((updates: Partial<AIConfig>) => {
-    setConfig((prev) => {
-      const next = { ...prev, ...updates };
+    setConfig((previous) => {
+      const next = { ...previous, ...updates };
       saveAIConfig(next);
       return next;
     });
@@ -71,16 +112,16 @@ export function AISettings({ open, onClose }: AISettingsProps) {
   const t = useTranslations("ai");
   const { config, updateConfig } = useAIConfig();
   const [testLoading, setTestLoading] = useState(false);
+  const models = getProviderModels(config.provider);
 
-  // Sync model when provider changes
   useEffect(() => {
-    const models = PROVIDER_MODELS[config.provider];
-    if (models.length > 0 && !models.some((m) => m.value === config.model)) {
-      updateConfig({ model: models[0].value });
+    const firstModel = models[0];
+    if (firstModel && !models.some((model) => model.value === config.model)) {
+      updateConfig({ model: firstModel.value });
     }
-  }, [config.provider, config.model, updateConfig]);
+  }, [config.model, models, updateConfig]);
 
-  const handleTestKey = useCallback(async () => {
+  const testApiKey = useCallback(async () => {
     if (!config.apiKey && config.provider !== "ollama") {
       toast.error(t("enterKeyFirst"));
       return;
@@ -104,102 +145,142 @@ export function AISettings({ open, onClose }: AISettingsProps) {
       if (response.ok) {
         toast.success(t("keyWorks"));
       } else {
-        const data = await response.json();
-        toast.error(data.error ?? t("keyInvalid"));
+        const data: unknown = await response.json();
+        const errorMessage =
+          typeof data === "object" &&
+          data !== null &&
+          "error" in data &&
+          typeof data.error === "string"
+            ? data.error
+            : t("keyInvalid");
+        toast.error(errorMessage);
       }
     } catch {
       toast.error(t("connectionError"));
     } finally {
       setTestLoading(false);
     }
-  }, [config]);
+  }, [config, t]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-50 w-full max-w-lg mx-4 bg-background rounded-xl shadow-2xl border border-border overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+      <button
+        type="button"
+        aria-label={t("close")}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-settings-title"
+        className="relative z-50 mx-4 w-full max-w-lg overflow-hidden rounded-xl border border-border bg-background shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-2">
-            <Settings className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">{t("settings")}</h2>
+            <Settings className="size-5 text-primary" />
+            <h2 id="ai-settings-title" className="text-lg font-semibold">
+              {t("settings")}
+            </h2>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-            <X className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label={t("close")}
+          >
+            <X className="size-4" />
           </Button>
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-4 space-y-5">
-          {/* Provider */}
+        <div className="space-y-5 px-6 py-4">
           <div className="space-y-2">
-            <Label>{t("provider")}</Label>
+            <Label htmlFor="ai-provider">{t("provider")}</Label>
             <select
+              id="ai-provider"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               value={config.provider}
-              onChange={(e) => updateConfig({ provider: e.target.value as AIProvider })}
+              onChange={(event) => {
+                const provider = event.target.value;
+                if (isAIProvider(provider)) updateConfig({ provider });
+              }}
             >
-              {(Object.keys(PROVIDER_LABELS) as AIProvider[]).map((key) => (
-                <option key={key} value={key}>
-                  {PROVIDER_LABELS[key]}
+              {PROVIDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Model */}
           <div className="space-y-2">
-            <Label>{t("model")}</Label>
+            <Label htmlFor="ai-model">{t("model")}</Label>
             <select
+              id="ai-model"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               value={config.model}
-              onChange={(e) => updateConfig({ model: e.target.value })}
+              onChange={(event) => {
+                updateConfig({ model: event.target.value });
+              }}
             >
-              {PROVIDER_MODELS[config.provider].map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
+              {models.map((model) => (
+                <option key={model.value} value={model.value}>
+                  {model.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Base URL (Ollama) */}
-          {config.provider === "ollama" && (
+          {config.provider === "ollama" ? (
             <div className="space-y-2">
-              <Label>Base URL</Label>
+              <Label htmlFor="ai-base-url">Base URL</Label>
               <Input
-                type="text"
+                id="ai-base-url"
+                type="url"
                 placeholder="http://localhost:11434/v1"
                 value={config.baseURL}
-                onChange={(e) => updateConfig({ baseURL: e.target.value })}
+                onChange={(event) => {
+                  updateConfig({ baseURL: event.target.value });
+                }}
               />
               <p className="text-xs text-muted-foreground">
                 Stellen Sie sicher, dass Ollama auf Ihrem Rechner läuft.
               </p>
             </div>
-          )}
+          ) : null}
 
-          {/* API Key */}
           <div className="space-y-2">
-            <Label>{t("apiKey")}</Label>
+            <Label htmlFor="ai-api-key">{t("apiKey")}</Label>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Key className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  id="ai-api-key"
                   type="password"
-                  placeholder={config.provider === "ollama" ? "Optional — lokal nicht erforderlich" : "sk-... / api-key-..."}
+                  placeholder={
+                    config.provider === "ollama"
+                      ? "Optional, lokal nicht erforderlich"
+                      : "API-Schlüssel"
+                  }
                   value={config.apiKey}
-                  onChange={(e) => updateConfig({ apiKey: e.target.value })}
+                  onChange={(event) => {
+                    updateConfig({ apiKey: event.target.value });
+                  }}
                   className="pl-9"
                 />
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleTestKey}
-                disabled={testLoading || (!config.apiKey && config.provider !== "ollama")}
+                onClick={() => {
+                  void testApiKey();
+                }}
+                disabled={
+                  testLoading ||
+                  (!config.apiKey && config.provider !== "ollama")
+                }
                 className="shrink-0"
               >
                 {testLoading ? t("testing") : t("testConnection")}
@@ -207,22 +288,18 @@ export function AISettings({ open, onClose }: AISettingsProps) {
             </div>
           </div>
 
-          {/* Privacy Notice */}
-          <Card className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800">
+          <Card className="border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-950/30">
             <div className="flex gap-2 text-xs text-emerald-800 dark:text-emerald-300">
-              <Shield className="w-4 h-4 shrink-0 mt-0.5" />
+              <Shield className="mt-0.5 size-4 shrink-0" />
               <div>
-                <p className="font-medium mb-1">{t("privacyTitle")}</p>
-                <p>
-                  {t("privacyNotice")}
-                </p>
+                <p className="mb-1 font-medium">{t("privacyTitle")}</p>
+                <p>{t("privacyNotice")}</p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end px-6 py-4 border-t bg-muted/30">
+        <div className="flex justify-end border-t bg-muted/30 px-6 py-4">
           <Button onClick={onClose}>{t("done")}</Button>
         </div>
       </div>
