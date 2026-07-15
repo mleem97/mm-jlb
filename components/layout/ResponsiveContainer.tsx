@@ -1,21 +1,29 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
 
-const maxWidthMap = {
-  sm: "max-w-screen-sm",
-  md: "max-w-screen-md",
-  lg: "max-w-screen-lg",
-  xl: "max-w-screen-xl",
-} as const;
+type MaxWidth = "sm" | "md" | "lg" | "xl";
 
-type MaxWidth = keyof typeof maxWidthMap;
+function getMaxWidthClass(maxWidth: MaxWidth): string {
+  switch (maxWidth) {
+    case "sm":
+      return "max-w-screen-sm";
+    case "md":
+      return "max-w-screen-md";
+    case "lg":
+      return "max-w-screen-lg";
+    case "xl":
+      return "max-w-screen-xl";
+  }
+}
 
 interface ResponsiveContainerProps {
   maxWidth?: MaxWidth;
   padding?: boolean;
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function ResponsiveContainer({
@@ -28,7 +36,7 @@ export function ResponsiveContainer({
     <div
       className={cn(
         "mx-auto w-full",
-        maxWidthMap[maxWidth],
+        getMaxWidthClass(maxWidth),
         padding && "px-4 sm:px-6 lg:px-8",
         className,
       )}
