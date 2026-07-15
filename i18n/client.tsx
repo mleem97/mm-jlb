@@ -2,11 +2,11 @@
 
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
   useMemo,
+  useState,
 } from "react";
 import type { Locale } from "./config";
 import { defaultLocale } from "./config";
@@ -22,7 +22,6 @@ interface LocaleContextType {
 
 const LocaleContext = createContext<LocaleContextType | null>(null);
 
-// Dynamic import of message files
 async function loadMessages(locale: Locale): Promise<Messages> {
   switch (locale) {
     case "de":
@@ -36,32 +35,43 @@ async function loadMessages(locale: Locale): Promise<Messages> {
   }
 }
 
-// Get nested value from object by dot-notation key
+const BLOCKED_MESSAGE_KEYS = new Set([
+  "__proto__",
+  "prototype",
+  "constructor",
+]);
+
 function getNestedValue(obj: unknown, path: string): string | undefined {
   const keys = path.split(".");
   let current: unknown = obj;
+
   for (const key of keys) {
     if (
+      BLOCKED_MESSAGE_KEYS.has(key) ||
       current === null ||
-      current === undefined ||
-      typeof current !== "object"
+      typeof current !== "object" ||
+      !Object.hasOwn(current, key)
     ) {
       return undefined;
     }
-    current = (current as Record<string, unknown>)[key];
+
+    current = Reflect.get(current, key);
   }
+
   return typeof current === "string" ? current : undefined;
 }
 
-// Interpolate {variables} in a string
 function interpolate(
   template: string,
   values?: Record<string, string | number>,
 ): string {
   if (!values) return template;
-  return template.replace(/\{(\w+)\}/g, (_, key) => {
-    return values[key] !== undefined ? String(values[key]) : `{${key}}`;
-  });
+
+  return template.replace(/\{(\w+)\}/g, (_, key: string) =>
+    Object.hasOwn(values, key)
+      ? String(Reflect.get(values, key))
+      : `{${key}}`,
+  );
 }
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
@@ -69,24 +79,33 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Messages>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  // Read locale from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem("jlb:locale");
-    if (stored && (stored === "de" || stored === "en" || stored === "fr")) {
-      setLocaleState(stored as Locale);
+    if (stored === "de" || stored === "en" || stored === "fr") {
+      setLocaleState(stored);
     }
   }, []);
 
-  // Load messages when locale changes
   useEffect(() => {
+    let cancelled = false;
     setIsLoading(true);
-    loadMessages(locale).then((msgs) => {
-      setMessages(msgs);
-      setIsLoading(false);
-    });
+
+    void loadMessages(locale)
+      .then((loadedMessages) => {
+        if (!cancelled) setMessages(loadedMessages);
+      })
+      .catch((error: unknown) => {
+        console.error("[i18n] Failed to load messages", error);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [locale]);
 
-  // Update localStorage and html lang attribute when locale changes
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     localStorage.setItem("jlb:locale", newLocale);
@@ -120,12 +139,11 @@ export function useTranslations(namespace?: string) {
     throw new Error("useTranslations must be used within a LocaleProvider");
   }
 
-  const t = useCallback(
+  return useCallback(
     (key: string, values?: Record<string, string | number>): string => {
       const fullKey = namespace ? `${namespace}.${key}` : key;
       const value = getNestedValue(context.messages, fullKey);
       if (value === undefined) {
-        // Fallback: return the key itself in development
         if (process.env.NODE_ENV === "development") {
           console.warn(
             `[i18n] Missing translation: "${fullKey}" for locale "${context.locale}"`,
@@ -137,6 +155,4 @@ export function useTranslations(namespace?: string) {
     },
     [context.messages, context.locale, namespace],
   );
-
-  return t;
 }
