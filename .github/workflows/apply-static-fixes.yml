@@ -6,12 +6,20 @@ on:
       - fix/static-analysis-findings
     paths:
       - .github/workflows/apply-static-fixes.yml
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   remediate:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -88,5 +96,3 @@ jobs:
           test "${{ steps.types.outcome }}" = "success"
           test "${{ steps.unit.outcome }}" = "success"
           test "${{ steps.build.outcome }}" = "success"
-
-# Triggered after the workflow exists on the branch.
