@@ -1,87 +1,63 @@
-"use server";
+"use client";
 
-import nodemailer from "nodemailer";
+import type {
+  EmailAttachment,
+  EmailData,
+  SendEmailResult,
+  SmtpConfig,
+} from "@/lib/email/types";
 
-export interface SmtpConfig {
-  host: string;
-  port: number;
-  user: string;
-  pass: string;
-  secure: boolean;
-}
+export type {
+  EmailAttachment,
+  EmailData,
+  SendEmailResult,
+  SmtpConfig,
+} from "@/lib/email/types";
 
-export interface EmailData {
-  to: string;
-  subject: string;
-  body: string;
-}
+type EmailApiRequest =
+  | { action: "test"; smtp: SmtpConfig }
+  | {
+      action: "send";
+      smtp: SmtpConfig;
+      email: EmailData;
+      attachments: EmailAttachment[];
+    };
 
-export interface EmailAttachment {
-  filename: string;
-  content: string; // base64 encoded
-  contentType: string;
-}
-
-export interface SendEmailResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
-
-export async function testSmtpConnection(smtp: SmtpConfig): Promise<SendEmailResult> {
+async function callEmailApi(payload: EmailApiRequest): Promise<SendEmailResult> {
   try {
-    const transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: { user: smtp.user, pass: smtp.pass },
-      connectionTimeout: 10000,
+    const response = await fetch("/api/email", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
-    await transporter.verify();
-    return { success: true };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Verbindung fehlgeschlagen";
-    return { success: false, error: message };
+    const result = (await response.json().catch(() => null)) as SendEmailResult | null;
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: result?.error ?? "E-Mail-Anfrage fehlgeschlagen",
+      };
+    }
+
+    return result ?? { success: false, error: "Ungültige Serverantwort" };
+  } catch {
+    return {
+      success: false,
+      error: "Der E-Mail-Dienst ist nicht erreichbar",
+    };
   }
 }
 
-export async function sendApplicationEmail(
+export function testSmtpConnection(smtp: SmtpConfig): Promise<SendEmailResult> {
+  return callEmailApi({ action: "test", smtp });
+}
+
+export function sendApplicationEmail(
   smtp: SmtpConfig,
   email: EmailData,
   attachments: EmailAttachment[],
 ): Promise<SendEmailResult> {
-  try {
-    const transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: { user: smtp.user, pass: smtp.pass },
-      connectionTimeout: 15000,
-    });
-
-    // Verify connection first
-    await transporter.verify();
-
-    // Send email
-    const info = await transporter.sendMail({
-      from: `"${smtp.user}" <${smtp.user}>`,
-      to: email.to,
-      subject: email.subject,
-      text: email.body,
-      attachments: attachments.map((att) => ({
-        filename: att.filename,
-        content: Buffer.from(att.content, "base64"),
-        contentType: att.contentType,
-      })),
-    });
-
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "E-Mail konnte nicht gesendet werden";
-    return { success: false, error: message };
-  }
+  return callEmailApi({ action: "send", smtp, email, attachments });
 }
