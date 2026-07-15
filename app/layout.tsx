@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./reduced-motion.css";
 import { Toaster } from "@/components/ui/sonner";
 import { KeyboardShortcutsProvider } from "@/components/providers/KeyboardShortcutsProvider";
 import { MotionProvider } from "@/components/providers/MotionProvider";
