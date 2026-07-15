@@ -1,25 +1,15 @@
 name: Apply static-analysis fixes
 
 on:
-  push:
-    branches:
-      - fix/static-analysis-findings
-    paths:
-      - .github/workflows/apply-static-fixes.yml
   pull_request:
     branches:
       - main
-    types:
-      - opened
-      - synchronize
-      - reopened
 
 permissions:
   contents: write
 
 jobs:
   remediate:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -28,6 +18,7 @@ jobs:
         with:
           ref: fix/static-analysis-findings
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -72,6 +63,10 @@ jobs:
           rm -f tools/fix_static_findings.py
           rm -f tools/fix_static_findings_followup.py
           rm -f .github/workflows/apply-static-fixes.yml
+          rm -f docs/.static-analysis-remediation-trigger
+          rm -f docs/.static-analysis-pr-note
+          rm -f docs/.static-analysis-run
+          rm -f docs/.keep
 
       - name: Commit remediations
         run: |
