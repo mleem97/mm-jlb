@@ -2,14 +2,18 @@
 
 import { cn } from "@/lib/utils";
 
-/* ─── Spinner ──────────────────────────────────────────────── */
-const sizeMap = {
-  sm: "h-4 w-4 border-2",
-  md: "h-8 w-8 border-[3px]",
-  lg: "h-12 w-12 border-4",
-} as const;
+type SpinnerSize = "sm" | "md" | "lg";
 
-type SpinnerSize = keyof typeof sizeMap;
+function getSpinnerSizeClass(size: SpinnerSize): string {
+  switch (size) {
+    case "sm":
+      return "size-4 border-2";
+    case "md":
+      return "size-8 border-[3px]";
+    case "lg":
+      return "size-12 border-4";
+  }
+}
 
 interface SpinnerProps {
   size?: SpinnerSize;
@@ -23,7 +27,7 @@ export function Spinner({ size = "md", className }: SpinnerProps) {
       aria-label="Laden"
       className={cn(
         "animate-spin rounded-full border-muted-foreground/30 border-t-primary",
-        sizeMap[size],
+        getSpinnerSizeClass(size),
         className,
       )}
     >
@@ -32,7 +36,6 @@ export function Spinner({ size = "md", className }: SpinnerProps) {
   );
 }
 
-/* ─── Skeleton ─────────────────────────────────────────────── */
 interface SkeletonProps {
   className?: string;
 }
@@ -46,7 +49,6 @@ export function Skeleton({ className }: SkeletonProps) {
   );
 }
 
-/* ─── LoadingOverlay ───────────────────────────────────────── */
 interface LoadingOverlayProps {
   message?: string;
   fullScreen?: boolean;
@@ -69,9 +71,9 @@ export function LoadingOverlay({
       )}
     >
       <Spinner size="lg" />
-      {message && (
+      {message ? (
         <p className="text-sm text-muted-foreground">{message}</p>
-      )}
+      ) : null}
     </div>
   );
 }
