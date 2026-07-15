@@ -13,6 +13,10 @@ type ObfuscatedTextProps = {
   asLinkType?: "mailto" | "tel";
 };
 
+function decodeObfuscatedValue(encoded: string): string {
+  return atob(encoded).replace(/[\r\n]/g, "").trim();
+}
+
 export function ObfuscatedText({
   encoded,
   label,
@@ -22,7 +26,7 @@ export function ObfuscatedText({
   asLinkType,
 }: ObfuscatedTextProps) {
   const [revealed, setRevealed] = useState(false);
-  const decoded = revealed ? atob(encoded) : "";
+  const decoded = revealed ? decodeObfuscatedValue(encoded) : "";
   const content = multiline ? (
     <span className="whitespace-pre-line">{decoded}</span>
   ) : (
@@ -31,12 +35,14 @@ export function ObfuscatedText({
 
   return (
     <span className={className}>
-      {label ? <span className="font-medium text-foreground">{label} </span> : null}
+      {label ? (
+        <span className="font-medium text-foreground">{label} </span>
+      ) : null}
       {revealed ? (
         asLinkType ? (
           <a
-            href={`${asLinkType}:${decoded}`}
-            className="text-indigo-500 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background rounded-sm"
+            href={`${asLinkType}:${encodeURI(decoded)}`}
+            className="rounded-sm text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background hover:text-primary/80"
           >
             {content}
           </a>
@@ -46,8 +52,10 @@ export function ObfuscatedText({
       ) : (
         <button
           type="button"
-          onClick={() => setRevealed(true)}
-          className="text-indigo-500 hover:text-indigo-600 underline decoration-dotted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background rounded-sm"
+          onClick={() => {
+            setRevealed(true);
+          }}
+          className="rounded-sm text-primary underline decoration-dotted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background hover:text-primary/80"
         >
           {revealLabel}
         </button>
@@ -73,13 +81,20 @@ export function ObfuscatedAction({
   variant,
   size,
 }: ObfuscatedActionProps) {
-  const handleClick = () => {
-    const decoded = atob(encoded);
-    window.location.href = `${actionType}:${decoded}`;
+  const openObfuscatedAction = () => {
+    const decoded = decodeObfuscatedValue(encoded);
+    const target = `${actionType}:${encodeURI(decoded)}`;
+    window.open(target, "_self", "noopener,noreferrer");
   };
 
   return (
-    <Button type="button" onClick={handleClick} className={className} variant={variant} size={size}>
+    <Button
+      type="button"
+      onClick={openObfuscatedAction}
+      className={className}
+      variant={variant}
+      size={size}
+    >
       {label}
     </Button>
   );
