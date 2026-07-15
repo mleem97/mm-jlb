@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,42 +24,38 @@ import { useTranslations } from "@/i18n/client";
 
 export function DataManagement() {
   const t = useTranslations("data");
+  const { replace } = useRouter();
   const [confirmText, setConfirmText] = useState("");
-  const resetApplication = useApplicationStore((s) => s.resetApplication);
+  const resetApplication = useApplicationStore((state) => state.resetApplication);
 
-  const handleDelete = async () => {
-    // Reset Zustand store
+  const deleteApplicationData = async () => {
     resetApplication();
 
-    // Clear IndexedDB tables
     try {
       await applicationDb.applications.clear();
       await applicationDb.attachments.clear();
     } catch {
-      // IndexedDB may not be available in some environments
+      // IndexedDB may not be available in some environments.
     }
 
-    // Clear localStorage
     try {
       localStorage.removeItem("application-storage");
       localStorage.removeItem("jlb-theme");
       localStorage.removeItem("jlb-privacy-accepted");
     } catch {
-      // localStorage may not be available
+      // localStorage may not be available in some environments.
     }
 
     setConfirmText("");
     toast.success(t("deleted"));
-
-    // Redirect to intro
-    window.location.href = "/intro";
+    replace("/intro");
   };
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="gap-2">
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="size-4" />
           {t("deleteAll")}
         </Button>
       </AlertDialogTrigger>
@@ -80,19 +77,27 @@ export function DataManagement() {
           <Input
             id="confirm-delete"
             value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
+            onChange={(event) => {
+              setConfirmText(event.target.value);
+            }}
             placeholder={t("deleteConfirmInput")}
             className="mt-2"
           />
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setConfirmText("")}>
+          <AlertDialogCancel
+            onClick={() => {
+              setConfirmText("");
+            }}
+          >
             {t("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
             disabled={confirmText !== t("deleteConfirmInput")}
-            onClick={handleDelete}
+            onClick={() => {
+              void deleteApplicationData();
+            }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
           >
             {t("deleteFinal")}
