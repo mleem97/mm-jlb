@@ -1,9 +1,9 @@
 name: Agent repository export
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/fix-react-review-audit
+      - main
 
 permissions:
   contents: read
