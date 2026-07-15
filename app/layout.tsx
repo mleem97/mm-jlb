@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { KeyboardShortcutsProvider } from "@/components/providers/KeyboardShortcutsProvider";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 import { PrivacyNotice } from "@/components/features/PrivacyNotice";
 import { PWAInstallPrompt } from "@/components/features/PWAInstallPrompt";
 import { LocaleProvider } from "@/i18n/client";
@@ -19,7 +20,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Job Letter Builder",
-  description: "Professionelle Bewerbungen erstellen – 100% offline und Datenschutz-freundlich",
+  description:
+    "Professionelle Bewerbungen erstellen – 100% offline und Datenschutz-freundlich",
   manifest: "/manifest.json",
 };
 
@@ -39,12 +41,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <LocaleProvider>
-          <KeyboardShortcutsProvider>
-            {children}
-            <PrivacyNotice />
-            <PWAInstallPrompt />
-          </KeyboardShortcutsProvider>
-          <Toaster />
+          <MotionProvider>
+            <KeyboardShortcutsProvider>
+              {children}
+              <PrivacyNotice />
+              <PWAInstallPrompt />
+            </KeyboardShortcutsProvider>
+            <Toaster />
+          </MotionProvider>
         </LocaleProvider>
       </body>
     </html>
